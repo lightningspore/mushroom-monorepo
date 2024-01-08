@@ -7,6 +7,7 @@ import cv2
 import numpy as np
 #import paho.mqtt.client as mqtt
 import time
+import argparse
 
 def avg_circles(circles, b):
     avg_x=0
@@ -178,10 +179,10 @@ def get_current_value(img, min_angle, max_angle, min_value, max_value, x, y, r, 
     lines = cv2.HoughLinesP(image=dst2, rho=3, theta=np.pi / 180, threshold=100,minLineLength=minLineLength, maxLineGap=0)  # rho is set to 3 to detect more lines, easier to get more then filter them out later
 
     #for testing purposes, show all found lines
-    # for i in range(0, len(lines)):
-    #   for x1, y1, x2, y2 in lines[i]:
-    #      cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-    #      cv2.imwrite('gauge-%s-lines-test.%s' %(gauge_number, file_type), img)
+    for i in range(0, len(lines)):
+      for x1, y1, x2, y2 in lines[i]:
+         cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+         cv2.imwrite('gauge-%s-lines-test.%s' %(gauge_number, file_type), img)
     num_total_lines =  len(lines)
     print(f"Found {num_total_lines} total lines! Most are probably worthless!")
 
@@ -218,22 +219,25 @@ def get_current_value(img, min_angle, max_angle, min_value, max_value, x, y, r, 
         cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
     num_filtered_lines =  len(final_line_list)
-    print(f"Found {num_filtered_lines} filtered lines! Success is in here somewhere!")
+    if num_filtered_lines > 0:
+        print(f"Found {num_filtered_lines} filtered lines! Success is in here somewhere!")
+    else:
+        print("NO LINES FOUND!")
 
     import code
     # code.interact(local=locals())
 
     for aline in final_line_list:
-    # assumes the first line is the best one
-    # x1 = final_line_list[0][0]
-    # y1 = final_line_list[0][1]
-    # x2 = final_line_list[0][2]
-    # y2 = final_line_list[0][3]
+        # assumes the first line is the best one
+        # x1 = final_line_list[0][0]
+        # y1 = final_line_list[0][1]
+        # x2 = final_line_list[0][2]
+        # y2 = final_line_list[0][3]
         x1 = aline[0]
         y1 = aline[1]
         x2 = aline[2]
         y2 = aline[3]
-    # Draw the chosen line in RED
+        # Draw the chosen line in RED
         cv2.line(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
 
         #for testing purposes, show the line overlayed on the original image
@@ -292,13 +296,26 @@ def get_current_value(img, min_angle, max_angle, min_value, max_value, x, y, r, 
     return new_value
 
 def main():
-    gauge_number = 10
-    file_type='png'
+    parser = argparse.ArgumentParser(description="Process a filename.")
+    parser.add_argument("file_base", help="The base-name of the file to process ")
+    parser.add_argument("file_number", help="The number of the file to process")
+    parser.add_argument("file_type", help="The type (png or jpeg) of the file to process")
+
+
+    args = parser.parse_args()
+    gauge_file_base = args.file_base
+    gauge_number = args.file_number
+    file_type = args.file_type
+
+    img_path = f"images/{gauge_file_base}-{gauge_number}.{file_type}"
+    print(f"Reading image: {img_path}")
+    img = cv2.imread(img_path)
+
     # name the calibration image of your gauge 'gauge-#.jpg', for example 'gauge-5.jpg'.  It's written this way so you can easily try multiple images
     min_angle, max_angle, min_value, max_value, units, x, y, r = calibrate_gauge(gauge_number, file_type)
 
     #feed an image (or frame) to get the current value, based on the calibration, by default uses same image as calibration
-    img = cv2.imread('images/gauge-%s.%s' % (gauge_number, file_type))
+
     val = get_current_value(img, min_angle, max_angle, min_value, max_value, x, y, r, gauge_number, file_type)
     print("Current reading: %s %s" %(val, units))
 
