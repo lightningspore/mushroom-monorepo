@@ -34,37 +34,26 @@ def set_heater_power(level):
     new_config.auto_off_delay = new_auto_off_interval
     plug_1.switch.set_config(new_config)
 
-# Cycle period is 30 seconds
+
+
+###  CREATE NEW scheduled event (turn on outlet every 30 seconds)
+# --- Cycle period is 30 seconds
 timespec1 = "*/30 * * * * *"
 
 job = SwitchSetRequest(
     id=1,
     params=SwitchSetParams(id=0, on=True),
 )
+plug_1.schedule.create(enable=True, timespec=timespec1, calls=[job])
 
-# CREATE NEW scheduled tasks
-req = ScheduleCreateRequest(
-    id=1,
-    params=ScheduleCreateParams(
-        enable=True, timespec=timespec1, calls=[job.model_dump()]
-    ),
-)
+### set the DUTY CYCLE of the HOT PLATE output!
 
-response = post(device_rpc_url, json=req.model_dump())
-schedule_create_1 = ScheduleCreateResponse(**response.json()["result"])
-
-
-## set the DUTY CYCLE of the HOT PLATE output!
+# --- new on/off interval seconds: 22 (time on) / 8 (time off)
 set_heater_power(75)
-# new on/off interval seconds: 22 (time on) / 8 (time off)
+
 
 ### ENABLE OR DISABLE the power control settings
 power_control_active = True
-req = ScheduleUpdateRequest(
-    id=1,
-    params=ScheduleUpdateParams(
-        id=2, enable=power_control_active, timespec=scheduled_tasks.jobs[0].timespec, calls=scheduled_tasks.jobs[0].calls
-    ),
-)
-response = post(device_rpc_url, json=req.model_dump())
-schedule_update = ScheduleUpdateResponse(**response.json()["result"])
+
+plug_1.schedule.update(2, enabled=power_control_active)
+plug_1.schedule.list().jobs[0].enable

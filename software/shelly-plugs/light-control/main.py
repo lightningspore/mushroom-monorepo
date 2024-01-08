@@ -5,6 +5,7 @@ from requests import post
 from ishelly.components.switch import *
 from ishelly.components.schedule import *
 from ishelly.components.shelly import *
+from ishelly.client import ShellyPlug
 
 ### DETAILS:
 ### This code is intended to control a Shelly PlugUS which is setup and running on your network.
@@ -16,38 +17,26 @@ device_rpc_url = "http://192.168.1.201/rpc"
 
 switch_id = 0
 SECONDS_IN_HOUR = 3600
-turn_on = SwitchSetRequest(
-    id=1,
-    params=SwitchSetParams(id=switch_id, toggle_after=0, on=True),
-)
-
-turn_off = SwitchSetRequest(
-    id=1,
-    params=SwitchSetParams(id=switch_id, toggle_after=0, on=False),
-)
 
 
 # CRON FORMAT: sec min hour days week weekend
 # LIGHTS ON: 7AM
 timespec_on = "0 0 7 * * *"
 
-req = ScheduleCreateRequest(
+turn_on = SwitchSetRequest(
     id=1,
-    params=ScheduleCreateParams(
-        enable=True, timespec=timespec_on, calls=[job_on.model_dump()]
-    ),
+    params=SwitchSetParams(id=switch_id, toggle_after=0, on=True),
 )
-response = post(device_rpc_url, json=req.model_dump())
-schedule_create_1 = ScheduleCreateResponse(**response.json()["result"])
+
+plug_1.schedule.create(enable=True, timespec=timespec_on, calls=[turn_on])
 
 # LIGHTS OFF: 9PM
 timespec_off = "0 0 21 * * *"
 
-req = ScheduleCreateRequest(
+
+turn_off = SwitchSetRequest(
     id=1,
-    params=ScheduleCreateParams(
-        enable=True, timespec=timespec_off, calls=[job_off.model_dump()]
-    ),
+    params=SwitchSetParams(id=switch_id, toggle_after=0, on=False),
 )
-response = post(device_rpc_url, json=req.model_dump())
-schedule_create_1 = ScheduleCreateResponse(**response.json()["result"])
+
+plug_1.schedule.create(enable=True, timespec=timespec_off, calls=[turn_off])
