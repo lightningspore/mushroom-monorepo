@@ -6,6 +6,11 @@ from ishelly.components.switch import *
 from ishelly.components.schedule import *
 from ishelly.components.shelly import *
 
+### DETAILS:
+### This code is intended to control a Shelly PlugUS which is setup and running on your network.
+### Mine is running at `http://192.168.1.201`.
+### We create two scheduled events for the device: 1 for turning the light on, and 1 for turning the light off.
+
 
 device_rpc_url = "http://192.168.1.201/rpc"
 
