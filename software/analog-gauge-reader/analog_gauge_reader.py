@@ -29,7 +29,7 @@ def dist_2_pts(x1, y1, x2, y2):
     #print np.sqrt((x2-x1)^2+(y2-y1)^2)
     return np.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
-def calibrate_gauge(gauge_number, file_type):
+def calibrate_gauge(calibration_image_path):
     '''
         This function should be run using a test image in order to calibrate the range available to the dial as well as the
         units.  It works by first finding the center point and radius of the gauge.  Then it draws lines at hard coded intervals
@@ -40,9 +40,10 @@ def calibrate_gauge(gauge_number, file_type):
         It will return the min value with angle in degrees (as a tuple), the max value with angle in degrees (as a tuple),
         and the units (as a string).
     '''
-    calibration_image = "images/gauge-%s.%s" %(gauge_number, file_type)
-    print(f"reading calibration image file: {calibration_image}")
-    img = cv2.imread(calibration_image)
+    # calibration_image = "images/gauge-%s.%s" %(gauge_number, file_type)
+    print(f"reading calibration image file: {calibration_image_path}")
+    calibration_image_path = Path(calibration_image_path)
+    img = cv2.imread(calibration_image_path.as_posix())
     height, width = img.shape[:2]
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  #convert to gray
     #gray = cv2.GaussianBlur(gray, (5, 5), 0)
@@ -80,7 +81,8 @@ def calibrate_gauge(gauge_number, file_type):
 
     #for testing, output circles on image
     #cv2.imwrite('gauge-%s-circles.%s' % (gauge_number, file_type), img)
-
+    new_filename = calibration_image_path.stem + "-circles" + calibration_image_path.suffix
+    cv2.imwrite(new_filename, img)
 
     #for calibration, plot lines from center going out at every 10 degrees and add marker
     #for i from 0 to 36 (every 10 deg)
@@ -117,12 +119,14 @@ def calibrate_gauge(gauge_number, file_type):
     #add the lines and labels to the image
     for i in range(0,interval):
         cv2.line(img, (int(p1[i][0]), int(p1[i][1])), (int(p2[i][0]), int(p2[i][1])),(0, 255, 0), 2)
-        cv2.putText(img, '%s' %(int(i*separation)), (int(p_text[i][0]), int(p_text[i][1])), cv2.FONT_HERSHEY_SIMPLEX, 0.3,(0,0,0),1,cv2.LINE_AA)
+        cv2.putText(img, '%s' %(int(i*separation)), (int(p_text[i][0]), int(p_text[i][1])), cv2.FONT_HERSHEY_SIMPLEX, 0.3,(255,255,255),1,cv2.LINE_AA)
 
-    cv2.imwrite('gauge-%s-calibration.%s' % (gauge_number, file_type), img)
+    new_filename = calibration_image_path.stem + "-calibration" + calibration_image_path.suffix
+    cv2.imwrite(new_filename, img)
+    
 
     #get user input on min, max, values, and units
-    print('gauge number: %s' %gauge_number)
+    # print('gauge number: %s' %gauge_number)
     # min_angle = input('Min angle (lowest possible angle of dial) - in degrees: ') #the lowest possible angle
     # max_angle = input('Max angle (highest possible angle) - in degrees: ') #highest possible angle
     # min_value = input('Min value: ') #usually zero
@@ -138,15 +142,17 @@ def calibrate_gauge(gauge_number, file_type):
 
     return min_angle, max_angle, min_value, max_value, units, x, y, r
 
-def get_current_value(img, min_angle, max_angle, min_value, max_value, x, y, r, gauge_number, file_type):
+def get_current_value(img, img_path, min_angle, max_angle, min_value, max_value, x, y, r):
 
     #for testing purposes
     #img = cv2.imread('gauge-%s.%s' % (gauge_number, file_type))
 
+    img_path = Path(img_path)
+
     gray2 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     # Set threshold and maxValue
-    thresh = 150
+    thresh = 50
     maxValue = 255
 
     # for testing purposes, found cv2.THRESH_BINARY_INV to perform the best
@@ -164,6 +170,8 @@ def get_current_value(img, min_angle, max_angle, min_value, max_value, x, y, r, 
     # apply thresholding which helps for finding lines
     th, dst2 = cv2.threshold(gray2, thresh, maxValue, cv2.THRESH_BINARY_INV)
 
+    new_filename = img_path.stem + "-gray" + img_path.suffix
+    cv2.imwrite(new_filename, gray2)
     # import code
     # code.interact(local=locals())
 
@@ -173,18 +181,22 @@ def get_current_value(img, min_angle, max_angle, min_value, max_value, x, y, r, 
     #dst2 = cv2.GaussianBlur(dst2, (5, 5), 0)
 
     # for testing, show image after thresholding
-    cv2.imwrite('gauge-%s-tempdst2.%s' % (gauge_number, file_type), dst2)
+    new_filename = img_path.stem + "-tempdst2" + img_path.suffix
+    cv2.imwrite(new_filename, dst2)
+    # cv2.imwrite('gauge-%s-tempdst2.%s' % (gauge_number, file_type), dst2)
 
     # find lines
-    minLineLength = 120
-    maxLineGap = 10
+    minLineLength = 80
+    maxLineGap = 20
     lines = cv2.HoughLinesP(image=dst2, rho=3, theta=np.pi / 180, threshold=100,minLineLength=minLineLength, maxLineGap=maxLineGap)  # rho is set to 3 to detect more lines, easier to get more then filter them out later
 
     #for testing purposes, show all found lines
     for i in range(0, len(lines)):
-      for x1, y1, x2, y2 in lines[i]:
-         cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-         cv2.imwrite('gauge-%s-lines-test.%s' %(gauge_number, file_type), img)
+        for x1, y1, x2, y2 in lines[i]:
+            cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+
+    new_filename = img_path.stem + "-lines-test" + img_path.suffix
+    cv2.imwrite(new_filename, img)
     num_total_lines =  len(lines)
     print(f"Found {num_total_lines} total lines! Most are probably worthless!")
 
@@ -246,7 +258,9 @@ def get_current_value(img, min_angle, max_angle, min_value, max_value, x, y, r, 
 
         #for testing purposes, show the line overlayed on the original image
         # cv2.imwrite('gauge-1-test.jpg', img)
-        cv2.imwrite('gauge-%s-lines.%s' % (gauge_number, file_type), img)
+        # cv2.imwrite('gauge-%s-lines.%s' % (gauge_number, file_type), img)
+        new_filename = img_path.stem + "-lines" + img_path.suffix
+        cv2.imwrite(new_filename, img)
 
         #find the farthest point from the center to be what is used to determine the angle
         dist_pt_0 = dist_2_pts(x, y, x1, y1)
@@ -334,10 +348,11 @@ def zoom_to_gauge(image_path):
     circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1, min_dist, np.array([]),
                             canny_high_threshold, accumulator_threshold, min_radius, max_radius)
     
+    print(circles)
     circles = np.round(circles[0, :]).astype("int")
     a,b,c = circles[0]
 
-        # Calculate the top-left and bottom-right coordinates for the cropping rectangle
+    # Calculate the top-left and bottom-right coordinates for the cropping rectangle
 
     cv2.circle(img, (a, b), c, (0, 0, 255), 3)
     cv2.circle(img, (a, b), 2, (255, 0, 255), -1)
@@ -345,19 +360,48 @@ def zoom_to_gauge(image_path):
 
     cv2.imwrite(new_filename, img)
 
+    mask = np.zeros(img.shape[:2], dtype=np.uint8)
+    cv2.circle(mask, (a, b), c, 1, thickness=-1)  # Fill the circle with white (1)
+
+    # Invert the mask to create a mask for the background
+    background_mask = cv2.bitwise_not(mask)
+
+    # Create an image with the background color you want (e.g., blue)
+    background_color = [0, 0, 0]  # Change to the color you want (BGR format)
+    background_img = np.full(img.shape, background_color, dtype=np.uint8)
+
+    # Apply the mask to the original image to keep only the circle area
+    img_with_circle = cv2.bitwise_and(img, img, mask=mask)
+
+    # Apply the inverted mask to the background image to keep only the background area
+    background = cv2.bitwise_and(background_img, background_img, mask=background_mask)
+
+    # Combine the two images: the image with the circle and the background
+    final_img = cv2.add(img_with_circle, background)
+
+    new_filename = original_image_path.stem + "-focused1" + original_image_path.suffix
+    new_filename = original_image_path.stem + "-focused" + original_image_path.suffix
+
+    # Save the final image
+    cv2.imwrite(new_filename, final_img)
 
 
+    # Crop image
     x1 = max(a - c - 20, 0)  # Ensure the coordinate doesn't go beyond the image boundary
     y1 = max(b - c - 20, 0)
     x2 = min(a + c + 20, img.shape[1])  # Ensure the coordinate doesn't go beyond the image width
     y2 = min(b + c + 20, img.shape[0])  # Ensure the coordinate doesn't go beyond the image height
 
     # Crop the image using calculated coordinates
-    cropped_img = img[y1:y2, x1:x2]
+    cropped_img = final_img[y1:y2, x1:x2]
     new_filename = original_image_path.stem + "-cropped" + original_image_path.suffix
 
     # Save the cropped image
     cv2.imwrite(new_filename, cropped_img)
+    return new_filename, cropped_img
+
+def focus_on_gauge():
+    pass
 
 
 def main():
@@ -392,15 +436,18 @@ def main():
     # name the calibration image of your gauge 'gauge-#.jpg', for example 'gauge-5.jpg'.  It's written this way so you can easily try multiple images
     min_angle, max_angle, min_value, max_value, units, x, y, r = calibrate_gauge(gauge_number, file_type)
 
-    #feed an image (or frame) to get the current value, based on the calibration, by default uses same image as calibration
+    # feed an image (or frame) to get the current value, based on the calibration, by default uses same image as calibration
 
     # val = get_current_value(img, min_angle, max_angle, min_value, max_value, x, y, r, gauge_number, file_type)
-    print("Current reading: %s %s" %(val, units))
+    # print("Current reading: %s %s" %(val, units))
 
 if __name__=='__main__':
     # main()
     photo_path, photo  = take_photo()
-    zoom_to_gauge(photo_path)
+    zoomed_image_path, zoomed_img = zoom_to_gauge(photo_path)
+    min_angle, max_angle, min_value, max_value, units, x, y, r = calibrate_gauge(zoomed_image_path)
+    val = get_current_value(zoomed_img, zoomed_image_path, min_angle, max_angle, min_value, max_value, x, y, r)
+    print("Current reading: %s %s" %(val, units))
     # import code
     # code.interact(local=locals())
    	
