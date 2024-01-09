@@ -13,7 +13,7 @@ from ishelly.client import ShellyPlug
 ### We create two scheduled events for the device: 1 for turning the light on, and 1 for turning the light off.
 
 
-device_rpc_url = "http://192.168.1.201/rpc"
+plug_1 = ShellyPlug("http://192.168.1.201")
 
 switch_id = 0
 SECONDS_IN_HOUR = 3600

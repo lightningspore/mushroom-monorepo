@@ -8,6 +8,8 @@ import numpy as np
 #import paho.mqtt.client as mqtt
 import time
 import argparse
+from datetime import datetime
+from pathlib import Path
 
 def avg_circles(circles, b):
     avg_x=0
@@ -174,9 +176,9 @@ def get_current_value(img, min_angle, max_angle, min_value, max_value, x, y, r, 
     cv2.imwrite('gauge-%s-tempdst2.%s' % (gauge_number, file_type), dst2)
 
     # find lines
-    minLineLength = 140
-    maxLineGap = 0
-    lines = cv2.HoughLinesP(image=dst2, rho=3, theta=np.pi / 180, threshold=100,minLineLength=minLineLength, maxLineGap=0)  # rho is set to 3 to detect more lines, easier to get more then filter them out later
+    minLineLength = 120
+    maxLineGap = 10
+    lines = cv2.HoughLinesP(image=dst2, rho=3, theta=np.pi / 180, threshold=100,minLineLength=minLineLength, maxLineGap=maxLineGap)  # rho is set to 3 to detect more lines, easier to get more then filter them out later
 
     #for testing purposes, show all found lines
     for i in range(0, len(lines)):
@@ -190,9 +192,9 @@ def get_current_value(img, min_angle, max_angle, min_value, max_value, x, y, r, 
     final_line_list = []
     #print "radius: %s" %r
 
-    diff1LowerBound = 0.05 #diff1LowerBound and diff1UpperBound determine how close the line should be from the center
-    diff1UpperBound = 0.25
-    diff2LowerBound = 0.5 #diff2LowerBound and diff2UpperBound determine how close the other point of the line should be to the outside of the gauge
+    diff1LowerBound = 0.01 #diff1LowerBound and diff1UpperBound determine how close the line should be from the center
+    diff1UpperBound = 0.35
+    diff2LowerBound = 0.01 #diff2LowerBound and diff2UpperBound determine how close the other point of the line should be to the outside of the gauge
     diff2UpperBound = 1.0
     for i in range(0, len(lines)):
         for x1, y1, x2, y2 in lines[i]:
@@ -208,6 +210,8 @@ def get_current_value(img, min_angle, max_angle, min_value, max_value, x, y, r, 
                 line_length = dist_2_pts(x1, y1, x2, y2)
                 # add to final list
                 final_line_list.append([x1, y1, x2, y2])
+            else:
+                print("skiiping line!", x1, x2, y1, y2)
 
     #testing only, show all lines after filtering
     for i in range(0,len(final_line_list)):
@@ -295,32 +299,108 @@ def get_current_value(img, min_angle, max_angle, min_value, max_value, x, y, r, 
 
     return new_value
 
+def take_photo():
+    file_type = "png"
+    cap = cv2.VideoCapture(0)
+
+    if not cap.isOpened():
+        print("Error: Camera not accessible")
+        exit()
+    ret, frame = cap.read()
+    img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    timestamp = str(int(datetime.timestamp(datetime.now())))
+    image_path = f"images/gauge-{timestamp}.{file_type}"
+    cv2.imwrite(image_path, img)
+    return image_path, img
+
+def zoom_to_gauge(image_path):
+    img = cv2.imread(image_path)
+    original_image_path = Path(image_path)
+    height, width = img.shape[:2]
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    min_radius = int(height * 0.1)  # 20% of the image height
+    max_radius = int(height * 0.5)  # 30% of the image height
+
+    # Adjust the minDist if necessary based on gauge size relative to the image size
+    min_dist = 50  # This is just an example value
+
+    # Adjust the high threshold for the Canny edge detector if the edges are not sharp
+    canny_high_threshold = 125  # Example value, adjust as necessary
+
+    # Adjust the accumulator threshold for detecting circle centers
+    accumulator_threshold = 120  # Example value, adjust as necessary
+
+    # The modified cv2.HoughCircles command
+    circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1, min_dist, np.array([]),
+                            canny_high_threshold, accumulator_threshold, min_radius, max_radius)
+    
+    circles = np.round(circles[0, :]).astype("int")
+    a,b,c = circles[0]
+
+        # Calculate the top-left and bottom-right coordinates for the cropping rectangle
+
+    cv2.circle(img, (a, b), c, (0, 0, 255), 3)
+    cv2.circle(img, (a, b), 2, (255, 0, 255), -1)
+    new_filename = original_image_path.stem + "-circles" + original_image_path.suffix
+
+    cv2.imwrite(new_filename, img)
+
+
+
+    x1 = max(a - c - 20, 0)  # Ensure the coordinate doesn't go beyond the image boundary
+    y1 = max(b - c - 20, 0)
+    x2 = min(a + c + 20, img.shape[1])  # Ensure the coordinate doesn't go beyond the image width
+    y2 = min(b + c + 20, img.shape[0])  # Ensure the coordinate doesn't go beyond the image height
+
+    # Crop the image using calculated coordinates
+    cropped_img = img[y1:y2, x1:x2]
+    new_filename = original_image_path.stem + "-cropped" + original_image_path.suffix
+
+    # Save the cropped image
+    cv2.imwrite(new_filename, cropped_img)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Process a filename.")
-    parser.add_argument("file_base", help="The base-name of the file to process ")
+    parser.add_argument("file_base", help="The base-name of the file to process")
     parser.add_argument("file_number", help="The number of the file to process")
     parser.add_argument("file_type", help="The type (png or jpeg) of the file to process")
+    parser.add_argument("take_photo", help="Ingest camera data from camera?", default=None)
 
 
     args = parser.parse_args()
     gauge_file_base = args.file_base
     gauge_number = args.file_number
     file_type = args.file_type
+    take_photo = bool(args.take_photo)
 
-    img_path = f"images/{gauge_file_base}-{gauge_number}.{file_type}"
-    print(f"Reading image: {img_path}")
-    img = cv2.imread(img_path)
+    if take_photo:
+        cap = cv2.VideoCapture(0)
+
+        if not cap.isOpened():
+            print("Error: Camera not accessible")
+            exit()
+        ret, frame = cap.read()
+        img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        gauge_number = str(int(datetime.timestamp(datetime.now())))
+        cv2.imwrite(f"images/{gauge_file_base}-{gauge_number}.{file_type}", img)
+    else:
+        img_path = f"images/{gauge_file_base}-{gauge_number}.{file_type}"
+        print(f"Reading image: {img_path}")
+        img = cv2.imread(img_path)
 
     # name the calibration image of your gauge 'gauge-#.jpg', for example 'gauge-5.jpg'.  It's written this way so you can easily try multiple images
     min_angle, max_angle, min_value, max_value, units, x, y, r = calibrate_gauge(gauge_number, file_type)
 
     #feed an image (or frame) to get the current value, based on the calibration, by default uses same image as calibration
 
-    val = get_current_value(img, min_angle, max_angle, min_value, max_value, x, y, r, gauge_number, file_type)
+    # val = get_current_value(img, min_angle, max_angle, min_value, max_value, x, y, r, gauge_number, file_type)
     print("Current reading: %s %s" %(val, units))
 
 if __name__=='__main__':
-    main()
+    # main()
+    photo_path, photo  = take_photo()
+    zoom_to_gauge(photo_path)
     # import code
     # code.interact(local=locals())
    	

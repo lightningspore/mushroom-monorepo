@@ -53,7 +53,7 @@ set_heater_power(75)
 
 
 ### ENABLE OR DISABLE the power control settings
-power_control_active = True
+power_control_active = False
 
 plug_1.schedule.update(2, enabled=power_control_active)
 plug_1.schedule.list().jobs[0].enable
