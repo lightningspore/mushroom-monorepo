@@ -10,6 +10,8 @@ import time
 import argparse
 from datetime import datetime
 from pathlib import Path
+import uvc
+from time import sleep
 
 def avg_circles(circles, b):
     avg_x=0
@@ -152,7 +154,7 @@ def get_current_value(img, img_path, min_angle, max_angle, min_value, max_value,
     gray2 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     # Set threshold and maxValue
-    thresh = 50
+    thresh = 150
     maxValue = 255
 
     # for testing purposes, found cv2.THRESH_BINARY_INV to perform the best
@@ -169,6 +171,15 @@ def get_current_value(img, img_path, min_angle, max_angle, min_value, max_value,
 
     # apply thresholding which helps for finding lines
     th, dst2 = cv2.threshold(gray2, thresh, maxValue, cv2.THRESH_BINARY_INV)
+
+    adaptive_threshold_image = cv2.adaptiveThreshold(gray2, 255, 
+                                                    cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+                                                    cv2.THRESH_BINARY, 11, 2)
+
+    new_filename = img_path.stem + "-gray2" + img_path.suffix
+    cv2.imwrite(new_filename, adaptive_threshold_image)
+
+    # dst2 = adaptive_threshold_image
 
     new_filename = img_path.stem + "-gray" + img_path.suffix
     cv2.imwrite(new_filename, gray2)
@@ -223,7 +234,8 @@ def get_current_value(img, img_path, min_angle, max_angle, min_value, max_value,
                 # add to final list
                 final_line_list.append([x1, y1, x2, y2])
             else:
-                print("skiiping line!", x1, x2, y1, y2)
+                # print("skiiping line!", x1, x2, y1, y2)
+                pass
 
     #testing only, show all lines after filtering
     for i in range(0,len(final_line_list)):
@@ -315,12 +327,44 @@ def get_current_value(img, img_path, min_angle, max_angle, min_value, max_value,
 
 def take_photo():
     file_type = "png"
-    cap = cv2.VideoCapture(0)
 
-    if not cap.isOpened():
-        print("Error: Camera not accessible")
-        exit()
-    ret, frame = cap.read()
+    devices = uvc.device_list()
+    cap = uvc.Capture(devices[0]["uid"])
+
+    # set image size
+    cap.frame_size = (1920, 1080)
+    cap.controls[3].value = 1
+    sleep(2)
+    # cap.controls[2].value = 200
+
+    # Do an initial frame to set the settings to be sane
+    # cap.controls[3].value = 1
+    # frame = cap.get_frame_robust()
+    # frame = cap.get_frame_robust()
+    # .... then change some stuff
+
+    # for i in range(0,len(cap.controls)):
+    #     print(f"{i} -- {cap.controls[i].doc}")
+    #     print(cap.controls[i].value)
+
+    # set autofocus off!
+    cap.controls[3].value = 0
+    # set absolute focus to 70!
+    cap.controls[4].value = 70
+    cap.controls[5].value = 200
+    
+    sleep(2)
+    cap.controls[12].value = 0
+    cap.controls[14].value = 0
+    frame = cap.get_frame_robust()
+    frame = frame.img
+    # cap.stop_stream()
+    # cap = cv2.VideoCapture(0)
+
+    # if not cap.isOpened():
+    #     print("Error: Camera not accessible")
+    #     exit()
+    # ret, frame = cap.read()
     img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     timestamp = str(int(datetime.timestamp(datetime.now())))
     image_path = f"images/gauge-{timestamp}.{file_type}"
