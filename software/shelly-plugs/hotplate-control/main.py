@@ -2,9 +2,7 @@ from pprint import pprint
 from requests import post
 
 
-from ishelly.components.switch import *
-from ishelly.components.schedule import *
-from ishelly.components.shelly import *
+from ishelly.components.switch import SwitchSetRequest, SwitchSetParams
 from ishelly.client import ShellyPlug
 
 ### DETAILS:
@@ -16,8 +14,6 @@ from ishelly.client import ShellyPlug
 ### Based on sensor reading or some other input, we will set the DUTY CYCLE.
 ### This means for 50% duty cycle: T=0 -> Power = ON, T=15 -> Power = OFF, T=30 -> Power = ON, T=45 -> Power = OFF
 
-
-device_rpc_url = "http://192.168.1.201/rpc"
 plug_1 = ShellyPlug("http://192.168.1.201")
 
 loop_time_interval = 30
