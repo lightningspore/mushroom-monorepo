@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "mushroom-notebook"
+version = "0.1.0"
+description = ""
+authors = ["Sam Korn <korn94sam@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+requests = "^2.31.0"
+opencv-python = "^4.9.0.80"
+wheel = "^0.42.0"
+ishelly = {path = "../../ishelly"}
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.12.1"
+ipykernel = "^6.28.0"
+jupyterlab = "^4.0.10"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
