@@ -9,8 +9,10 @@ async def startup_event():
     print("Server has started")
     devices = uvc.device_list()
     print(devices)
-    cap = uvc.Capture(devices[0]["uid"])
+    cap = uvc.Capture(devices[1]["uid"])
     cap.frame_size = (1920, 1080)
+    cap.controls[3].value = 0
+    cap.controls[4].value = 70
     app.state.cap = cap
 
 
