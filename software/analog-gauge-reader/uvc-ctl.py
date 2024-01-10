@@ -1,14 +1,15 @@
 import uvc
 import cv2
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 
 
 devices = uvc.device_list()
-cap = uvc.Capture(devices[0]["uid"])
+cap = uvc.Capture(devices[1]["uid"])
+cap.frame_size = (1920, 1080)
 frame = cap.get_frame_robust()
 
 
-cap.frame_size = (1920, 1080)
+
 
 
 # set zoom value

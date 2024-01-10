@@ -26,6 +26,11 @@ def photo():
     img = cv2.imencode('.jpg', frame.img)[1].tobytes()
     return Response(img, media_type="image/jpg")
 
+@app.post("/set-focus/{focus_value}")
+def set_focus(focus_value: int):
+    app.state.cap.controls[4].value = focus_value
+    return {"message": f"Focus value set to {focus_value}"}
+
 
 if __name__ == "__main__":
     import uvicorn
