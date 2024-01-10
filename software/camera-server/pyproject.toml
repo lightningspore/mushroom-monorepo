@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "camera-server"
+version = "0.1.0"
+description = ""
+authors = ["Sam Korn <korn94sam@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+wheel = "^0.42.0"
+setuptools = "^69.0.3"
+pupil-labs-uvc = "^1.0.0rc1"
+fastapi = "^0.108.0"
+uvicorn = "^0.25.0"
+opencv-python = "^4.9.0.80"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.12.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
