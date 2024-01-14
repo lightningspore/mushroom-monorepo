@@ -12,6 +12,7 @@ from datetime import datetime
 from pathlib import Path
 import uvc
 from time import sleep
+import requests
 
 def avg_circles(circles, b):
     avg_x=0
@@ -154,7 +155,7 @@ def get_current_value(img, img_path, min_angle, max_angle, min_value, max_value,
     gray2 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     # Set threshold and maxValue
-    thresh = 150
+    thresh = 100
     maxValue = 255
 
     # for testing purposes, found cv2.THRESH_BINARY_INV to perform the best
@@ -325,6 +326,20 @@ def get_current_value(img, img_path, min_angle, max_angle, min_value, max_value,
 
     return new_value
 
+
+def download_photo():
+    url = "http://192.168.1.241:8000/photo"
+    response = requests.get(url)
+    file_path = "downloaded_photo.jpg"
+
+    with open(file_path, "wb") as file:
+        file.write(response.content)
+
+    img = cv2.imread(file_path)
+    return file_path, img 
+
+
+
 def take_photo():
     file_type = "png"
 
@@ -487,7 +502,8 @@ def main():
 
 if __name__=='__main__':
     # main()
-    photo_path, photo  = take_photo()
+    # photo_path, photo  = take_photo()
+    photo_path, photo  = download_photo()
     zoomed_image_path, zoomed_img = zoom_to_gauge(photo_path)
     min_angle, max_angle, min_value, max_value, units, x, y, r = calibrate_gauge(zoomed_image_path)
     val = get_current_value(zoomed_img, zoomed_image_path, min_angle, max_angle, min_value, max_value, x, y, r)

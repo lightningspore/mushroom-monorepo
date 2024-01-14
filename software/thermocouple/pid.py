@@ -1,6 +1,7 @@
 import time
 import serial
 from ishelly.client import ShellyPlug
+from datetime import datetime
 
 
 # PID coefficients
@@ -42,12 +43,13 @@ def pid_loop():
     integral = 0
     previous_error = 0
     previous_time = time.time()
-    setpoint = 175  # Desired temperature
+    setpoint = 155  # Desired temperature
     while True:
         # Measure the current temperature
         current_temperature = read_temp_from_serial()
         print(f"CURRENT temp: {current_temperature}")
         print(f"SETPOINT temp: {setpoint}")
+        print(f"TIME: {datetime.now().isoformat()}")
         # Calculate error
         error = setpoint - current_temperature
         # Get the current time
@@ -83,7 +85,7 @@ def read_temp_from_serial():
         with serial.Serial(serial_port, baud_rate, timeout=1) as ser:
         # Read a line from the serial port
             data = ser.readline().decode('utf-8').rstrip()
-            print(data)
+            # print(data)
             result = float(data)
             return result
     except serial.SerialException as e:
@@ -91,59 +93,7 @@ def read_temp_from_serial():
         return None
 
 
-from ishelly.components.schedule import *
-from ishelly.components.shelly import *
-from ishelly.components.switch import *
+# Ensure scheduled task is enabled
 
-device_rpc_url = "http://192.168.1.201/rpc"
-
-
-job = SwitchSetRequest(
-    id=1,
-    params=SwitchSetParams(id=0, on=True),
-)
-
-# every minute
-timespec1 = "0 * * * * *"
-
-# every 30 seconds
-timespec1 = "*/30 * * * * *"
-
-# CREATE NEW scheduled tasks
-req = ScheduleCreateRequest(
-    id=1,
-    params=ScheduleCreateParams(
-        enable=True, timespec=timespec1, calls=[job.model_dump()]
-    ),
-)
-
-response = post(device_rpc_url, json=req.model_dump())
-schedule_create_1 = ScheduleCreateResponse(**response.json()["result"])
-
-
-
-
-req = ScheduleListRequest(id=1)
-response = post(device_rpc_url, json=req.model_dump())
-scheduled_tasks = ScheduleListResponse(**response.json()["result"])
-
-print(f"There are {len(scheduled_tasks.jobs)} scheduled tasks currently saved.")
-
-
-
-req = ScheduleDeleteRequest(
-    id=1,
-    params=ScheduleDeleteParams(id=3),
-)
-response = post(device_rpc_url, json=req.model_dump())
-schedule_delete = ScheduleDeleteResponse(**response.json()["result"])
-
-
-for job in scheduled_tasks.jobs:
-    req = ScheduleDeleteRequest(
-        id=1,
-        params=ScheduleDeleteParams(id=job.id),
-    )
-    response = post(device_rpc_url, json=req.model_dump())
-    schedule_delete = ScheduleDeleteResponse(**response.json()["result"])
-    print(schedule_delete)
+if __name__ == "__main__":
+    pid_loop()
