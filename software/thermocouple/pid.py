@@ -44,6 +44,12 @@ def pid_loop():
     previous_error = 0
     previous_time = time.time()
     setpoint = 155  # Desired temperature
+
+    max_on = 100
+    min_on = 1
+    # start at a low reasonable value
+    heater_setpoint = 40
+
     while True:
         # Measure the current temperature
         current_temperature = read_temp_from_serial()
@@ -52,15 +58,18 @@ def pid_loop():
         print(f"TIME: {datetime.now().isoformat()}")
         # Calculate error
         error = setpoint - current_temperature
+        print(f"Error Term: {error}")
         # Get the current time
         current_time = time.time()
-        # Calculate time_delta
+        # Calculate time_delta in seconds
         time_delta = current_time - previous_time
         # P term
         P_out = Kp * error
         # I term
         integral += error * time_delta
+        integral = min(integral, 2000)
         I_out = Ki * integral
+        # Ki = 0.01
         # D term
         derivative = (error - previous_error) / time_delta
         D_out = Kd * derivative
@@ -69,7 +78,21 @@ def pid_loop():
         print(f"Pout {P_out} + Iout {I_out} + Dout {D_out} = {PID_output}")
         # Apply the heating power (PID output) to the heater
         pid_output_normalized = max(min(PID_output, 100), 1)
-        set_heater_power(pid_output_normalized)
+        if PID_output > 20:
+            print("Increasing heater")
+            heater_setpoint += 1
+        elif PID_output < -20:
+            print("Decreasing heater")
+            heater_setpoint -= 1
+        else:
+            print("Heat is OK!!!")
+
+        if heater_setpoint > 100:
+            heater_setpoint = 100
+        if heater_setpoint < 1:
+            heater_setpoint = 1
+
+        set_heater_power(heater_setpoint)
         # Save current error and time for next iteration
         previous_error = error
         previous_time = current_time
