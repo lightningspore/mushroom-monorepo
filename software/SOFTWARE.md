@@ -7,6 +7,12 @@ Using CircuitPython (a type of MicroPython) we can read the temperature and humi
 ## Thermocouple Firmware
 Using CircuitPython (a type of MicroPython) we can read the temperature output of a thermocouple.
 
+CircuitPython download:
+https://circuitpython.org/board/raspberry_pi_pico_w/
+
+CircuitPython Library Drivers:
+https://docs.circuitpython.org/projects/bundle/en/latest/drivers.html
+
 ## Shelly IoT Devices
 Shelly make really cool IoT relays and power outlets. The devices run an internal webserver, and is very programmable, all without needing to use a cloud service to control the device.
 
