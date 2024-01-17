@@ -36,12 +36,57 @@ pool = socketpool.SocketPool(wifi.radio)
 server = Server(pool, "/static", debug=True)
 
 
+from prometheus_express import check_network, start_http_server, CollectorRegistry, Counter, Gauge, Router
+
+registry = CollectorRegistry(namespace="pico_dht20")
+
+humidity_g = Gauge(
+    'humidity_gauge',
+    'humidity sensor gauge',
+    labels=['ip'],
+    registry=registry
+)
+
+temp_g = Gauge(
+    'temp_gauge',
+    'temp sensor gauge',
+    labels=['ip'],
+    registry=registry
+)
+
+tempf_g = Gauge(
+    'temp_gauge',
+    'temp sensor gauge fahrenheight',
+    labels=['ip'],
+    registry=registry
+)
+
+wifi_rssi_g = Gauge(
+    'wifi_rssi_gauge',
+    'wifi_signal_rssi',
+    labels=['ip'],
+    registry=registry
+)
+
+
 @server.route("/")
 def base(request: Request):
     """
     Serve a default static plain text message.
     """
+    temp_g.set(sensor.temperature)
+    humidity_g.set(sensor.relative_humidity)
     return Response(request, f"Hello from the CircuitPython HTTP Server! {sensor.temperature}")
+
+@server.route("/metrics")
+def metrics(request: Request):
+    print("metrics")
+    temp_g.set(sensor.temperature)
+    humidity_g.set(sensor.relative_humidity)
+    metrics = "\n".join(registry.render())
+    #print(metrics)
+    return Response(request, metrics)
+
 
 
 server.serve_forever(str(wifi.radio.ipv4_address))
