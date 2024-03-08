@@ -1,21 +1,24 @@
-import time
-import json
-import os
+try:
+    import time
+    import json
+    import os
 
+    import board
+    import busio
+    import adafruit_ahtx0
 
-import board
-import busio
-import adafruit_ahtx0
+    import wifi
+    import board
+    import digitalio
 
-import wifi
-import board
-import digitalio
+    from adafruit_httpserver import Server, Request, Response
+    from prometheus_express import check_network, start_http_server, CollectorRegistry, Counter, Gauge, Router
 
-from adafruit_httpserver import Server, Request, Response
-from prometheus_express import check_network, start_http_server, CollectorRegistry, Counter, Gauge, Router
-
-# local imports
-from wifisetup import server, wifi
+    # local imports
+    from wifisetup import server, wifi
+except Exception as e:
+    with open("import_errors.log", "a") as error_log:
+        error_log.write(f"Import Error: {str(e)}\n")
 
 # create the I2C shared bus
 i2c = busio.I2C(board.GP5, board.GP4) 
@@ -23,7 +26,8 @@ sensor = adafruit_ahtx0.AHTx0(i2c, address=56)
 
 registry = CollectorRegistry(namespace="pico_dht20")
 
-
+with open("import_errors.log", "a") as error_log:
+    error_log.write(f"test123\n")
 
 humidity_g = Gauge(
     'humidity_gauge',
