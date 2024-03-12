@@ -14,10 +14,18 @@ try:
     import storage
 
 
-    from adafruit_httpserver import Server, Request, Response
+    from adafruit_httpserver import (
+        Server,
+        REQUEST_HANDLED_RESPONSE_SENT,
+        Request,
+        FileResponse,
+        Response,
+    )
     from prometheus_express import check_network, start_http_server, CollectorRegistry, Counter, Gauge, Router
 
-    from adafruit_httpserver import Server
+
+    from asyncio import create_task, gather, run, sleep as async_sleep
+
     # local imports
     # from wifisetup import server, wifi
 except Exception as e:
@@ -41,43 +49,42 @@ registry = CollectorRegistry(namespace="pico_dht20")
 humidity_g = Gauge(
     'humidity_gauge',
     'humidity sensor gauge',
-    labels=['ip'],
+    labels=['location'],
     registry=registry
 )
+humidity_g.values = {}
 
 temp_g = Gauge(
     'temp_gauge',
     'temp sensor gauge',
-    labels=['ip'],
+    labels=['location'],
     registry=registry
 )
+temp_g.values = {}
 
 tempf_g = Gauge(
     'tempf_gauge',
     'temp sensor gauge fahrenheight',
-    labels=['ip'],
+    labels=['location'],
     registry=registry
 )
+tempf_g.values = {}
 
 wifi_rssi_g = Gauge(
     'wifi_rssi_gauge',
     'wifi_signal_rssi',
-    labels=['ip'],
+    labels=['location'],
     registry=registry
 )
 
-def connect_to_wifi():
-    ssid = os.getenv("WIFI_SSID")
-    password = os.getenv("WIFI_PASSWORD")
 
-    print(f"Connecting to network: {ssid}")
-    print(f"Using password: {password}")
-    wifi.radio.connect(ssid, password)
-    print(f"Connected to: {ssid}")
-    print(f"Connected to Wifi?: {wifi.radio.connected}")
+
 
 pool = socketpool.SocketPool(wifi.radio)
 server = Server(pool, "/static", debug=True)
+server.start(port=6969)
+
+location = os.getenv("LOCATION")
 
 # def configure_server(server):
 @server.route("/")
@@ -89,23 +96,32 @@ def base(request: Request):
 
 @server.route("/metrics")
 def metrics(request: Request):
-    print("metrics")
-    temp_g.set(sensor.temperature)
-    tempf_g.set(sensor.temperature * 9 / 5 + 32)
-    humidity_g.set(sensor.relative_humidity)
-    metrics = "\n".join(registry.render())
-    #print(metrics)
-    return Response(request, metrics)
+    try:
+        print("metrics")
+        temp_g.labels(location).set(sensor.temperature)
+        tempf_g.labels(location).set(sensor.temperature * 9 / 5 + 32)
+        humidity_g.labels(location).set(sensor.relative_humidity)
+        metrics = "\n".join(registry.render())
+        #print(metrics)
+        return Response(request, metrics)
+    except Exception as e:
+        print("Error in metrics", str(e))
+        return Response(request, "Error in metrics")
 
 @server.route("/metrics/json")
-def metrics(request: Request):
-    print("metrics json")
-    metrics = {"tempf": sensor.temperature * 9 / 5 + 32, "tempc": sensor.temperature, "humidity": sensor.relative_humidity}
-    #print(metrics)
-    return Response(request, json.dumps(metrics))
+def metrics_json(request: Request):
+    try:
+        print("metrics json")
+        metrics = {"tempf": sensor.temperature * 9 / 5 + 32, "tempc": sensor.temperature, "humidity": sensor.relative_humidity}
+        #print(metrics)
+        print(humidity_g.values)
+        return Response(request, json.dumps(metrics))
+    except Exception as e:
+        print("Error in metrics", str(e))
+        return Response(request, "Error in metrics")
 
 
-def blinky(blink_count=1):
+async def blinky(blink_count=1):
     led.value = 0
     time.sleep(2)
 
@@ -116,39 +132,67 @@ def blinky(blink_count=1):
         time.sleep(0.1)
 
 
+async def do_something_useful():
+    count = 0
+    while True:
+        if wifi.radio.connected == False:
+            await blinky(10)
+            count += 1
+            if count > 20:
+                import microcontroller
+                microcontroller.reset()
+        else:
+            await blinky(3)
+        # Do something useful in this section,
+        # for example read a sensor and capture an average,
+        # or a running total of the last 10 samples
+        await async_sleep(1)
 
 
-def main():
+
+def connect_to_wifi():
+    ssid = os.getenv("WIFI_SSID")
+    password = os.getenv("WIFI_PASSWORD")
+
+    print(f"Connecting to network: {ssid}")
+    print(f"Using password: {password}")
+    wifi.radio.connect(ssid, password)
+    print(f"Connected to: {ssid}")
+    print(f"Connected to Wifi?: {wifi.radio.connected}")
+
+
+async def handle_http_requests():
+    while True:
+        # Process any waiting requests
+        pool_result = server.poll()
+
+        if pool_result == REQUEST_HANDLED_RESPONSE_SENT:
+            # Do something only after handling a request
+            pass
+
+        await async_sleep(0)
+
+async def main():
 
     global server
-    blinky(5)
+    await blinky(5)
+    # while wifi.radio.connected == False:
 
-    # i = 0
-    # while i < 20:
-    #     time.sleep(0.1)
-    #     i += 1
-    #     led.value = i % 2
-
-    # connect_to_wifi()
-    while wifi.radio.connected == False:
-        blinky(5)
-    
+    await gather(
+        create_task(handle_http_requests()),
+        create_task(do_something_useful()),
+    )
     
 
-    # Configure the server with routes
-    # configure_server(server)
-
-    # server.serve_forever(str(wifi.radio.ipv4_address))
-    # server.serve_forever(port=80)
-    server.start(port=6969)
-    while True:
-        blinky(3)
-        server.poll()
-        time.sleep(2)
+    
+    # while True:
+    #     blinky(3)
+    #     server.poll()
+    #     time.sleep(2)
 
 
 try:
-    main()
+    run(main())
 except Exception as e:
     import microcontroller
     import traceback
