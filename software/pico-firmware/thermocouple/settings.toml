@@ -1,0 +1,9 @@
+WIFI_SSID="your-network-name-here"
+WIFI_PASSWORD="your-network-password-here"
+
+# To auto-connect to Wi-Fi
+CIRCUITPY_WIFI_SSID="your-network-name-here"
+CIRCUITPY_WIFI_PASSWORD="your-network-password-here"
+
+# Device Labelling
+LOCATION="basement_1"

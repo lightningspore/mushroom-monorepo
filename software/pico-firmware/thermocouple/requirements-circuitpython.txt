@@ -1,0 +1,3 @@
+adafruit_mcp9600
+adafruit_httpserver
+asyncio
