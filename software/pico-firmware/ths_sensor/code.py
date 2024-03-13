@@ -13,7 +13,6 @@ try:
     import digitalio
     import storage
 
-
     from adafruit_httpserver import (
         Server,
         REQUEST_HANDLED_RESPONSE_SENT,
@@ -21,8 +20,14 @@ try:
         FileResponse,
         Response,
     )
-    from prometheus_express import check_network, start_http_server, CollectorRegistry, Counter, Gauge, Router
-
+    from prometheus_express import (
+        check_network,
+        start_http_server,
+        CollectorRegistry,
+        Counter,
+        Gauge,
+        Router,
+    )
 
     from asyncio import create_task, gather, run, sleep as async_sleep
 
@@ -30,6 +35,7 @@ try:
     # from wifisetup import server, wifi
 except Exception as e:
     import traceback
+
     exc_info = traceback.format_exc().splitlines()
     for line in exc_info:
         print(line)
@@ -39,7 +45,7 @@ except Exception as e:
 led = digitalio.DigitalInOut(board.LED)
 led.direction = digitalio.Direction.OUTPUT
 
-i2c = busio.I2C(board.GP5, board.GP4) 
+i2c = busio.I2C(board.GP5, board.GP4)
 sensor = adafruit_ahtx0.AHTx0(i2c, address=56)
 
 
@@ -47,37 +53,26 @@ sensor = adafruit_ahtx0.AHTx0(i2c, address=56)
 registry = CollectorRegistry(namespace="pico_dht20")
 
 humidity_g = Gauge(
-    'humidity_gauge',
-    'humidity sensor gauge',
-    labels=['location'],
-    registry=registry
+    "humidity_gauge", "humidity sensor gauge", labels=["location"], registry=registry
 )
 humidity_g.values = {}
 
 temp_g = Gauge(
-    'temp_gauge',
-    'temp sensor gauge',
-    labels=['location'],
-    registry=registry
+    "temp_gauge", "temp sensor gauge", labels=["location"], registry=registry
 )
 temp_g.values = {}
 
 tempf_g = Gauge(
-    'tempf_gauge',
-    'temp sensor gauge fahrenheight',
-    labels=['location'],
-    registry=registry
+    "tempf_gauge",
+    "temp sensor gauge fahrenheight",
+    labels=["location"],
+    registry=registry,
 )
 tempf_g.values = {}
 
 wifi_rssi_g = Gauge(
-    'wifi_rssi_gauge',
-    'wifi_signal_rssi',
-    labels=['location'],
-    registry=registry
+    "wifi_rssi_gauge", "wifi_signal_rssi", labels=["location"], registry=registry
 )
-
-
 
 
 pool = socketpool.SocketPool(wifi.radio)
@@ -85,6 +80,7 @@ server = Server(pool, "/static", debug=True)
 server.start(port=6969)
 
 location = os.getenv("LOCATION")
+
 
 # def configure_server(server):
 @server.route("/")
@@ -94,6 +90,7 @@ def base(request: Request):
     """
     return Response(request, f"Hello from the CircuitPython HTTP Server!")
 
+
 @server.route("/metrics")
 def metrics(request: Request):
     try:
@@ -102,18 +99,23 @@ def metrics(request: Request):
         tempf_g.labels(location).set(sensor.temperature * 9 / 5 + 32)
         humidity_g.labels(location).set(sensor.relative_humidity)
         metrics = "\n".join(registry.render())
-        #print(metrics)
+        # print(metrics)
         return Response(request, metrics)
     except Exception as e:
         print("Error in metrics", str(e))
         return Response(request, "Error in metrics")
 
+
 @server.route("/metrics/json")
 def metrics_json(request: Request):
     try:
         print("metrics json")
-        metrics = {"tempf": sensor.temperature * 9 / 5 + 32, "tempc": sensor.temperature, "humidity": sensor.relative_humidity}
-        #print(metrics)
+        metrics = {
+            "tempf": sensor.temperature * 9 / 5 + 32,
+            "tempc": sensor.temperature,
+            "humidity": sensor.relative_humidity,
+        }
+        # print(metrics)
         print(humidity_g.values)
         return Response(request, json.dumps(metrics))
     except Exception as e:
@@ -140,6 +142,7 @@ async def do_something_useful():
             count += 1
             if count > 20:
                 import microcontroller
+
                 microcontroller.reset()
         else:
             await blinky(3)
@@ -147,7 +150,6 @@ async def do_something_useful():
         # for example read a sensor and capture an average,
         # or a running total of the last 10 samples
         await async_sleep(1)
-
 
 
 def connect_to_wifi():
@@ -172,6 +174,7 @@ async def handle_http_requests():
 
         await async_sleep(0)
 
+
 async def main():
 
     global server
@@ -182,9 +185,7 @@ async def main():
         create_task(handle_http_requests()),
         create_task(do_something_useful()),
     )
-    
 
-    
     # while True:
     #     blinky(3)
     #     server.poll()
@@ -196,6 +197,7 @@ try:
 except Exception as e:
     import microcontroller
     import traceback
+
     exc_info = traceback.format_exc().splitlines()
     print("Error!!!", str(e))
     time.sleep(10)
@@ -205,7 +207,3 @@ except Exception as e:
         for line in exc_info:
             print(line)
         time.sleep(3)
-
-
-
-
