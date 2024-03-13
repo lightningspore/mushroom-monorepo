@@ -140,6 +140,10 @@ async def do_something_useful():
         if wifi.radio.connected == False:
             await blinky(10)
             count += 1
+            wifi.radio.connect(
+                os.getenv('CIRCUITPY_WIFI_SSID'),
+                os.getenv('CIRCUITPY_WIFI_PASSWORD')
+            )
             if count > 20:
                 import microcontroller
 
