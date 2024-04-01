@@ -41,12 +41,20 @@ except Exception as e:
     for line in exc_info:
         print(line)
 
+# *** Load Environment Variables ***
+location = os.getenv("LOCATION")
+led_pin = os.getenv("LED_PIN")
 
 # *** Configure Hardware Pins ***
-led = digitalio.DigitalInOut(board.LED)
+led = digitalio.DigitalInOut(board.__dict__[led_pin])
 led.direction = digitalio.Direction.OUTPUT
 
-i2c = busio.I2C(board.GP5, board.GP4)
+# PICO
+# i2c = busio.I2C(board.GP5, board.GP4)
+
+# XIAO ESP32S3
+i2c = busio.I2C(board.IO5, board.IO6)
+
 sensor = adafruit_ahtx0.AHTx0(i2c, address=56)
 
 
@@ -83,8 +91,7 @@ wifi_rssi_g = Gauge(
 pool = socketpool.SocketPool(wifi.radio)
 server = Server(pool, "/static", debug=True)
 server.start(port=6969)
-
-location = os.getenv("LOCATION")
+print("IP Address:", wifi.radio.ipv4_address)
 
 
 # def configure_server(server):
@@ -187,6 +194,8 @@ async def do_something_useful():
             # Do something useful in this section,
             # for example read a sensor and capture an average,
             # or a running total of the last 10 samples
+            print("IP Address:", wifi.radio.ipv4_address)
+
             print(f"Allocated Memory: {gc.mem_alloc()}")
             print(f"Free Memory: {gc.mem_free()}")
             print(f"Garbage Collection Enabled: {gc.isenabled()}")
