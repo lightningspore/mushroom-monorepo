@@ -5,6 +5,7 @@ try:
 
     import board
     import busio
+
     # from adafruit_mcp9600 import adafruit_mcp9600
     import adafruit_mcp9600
 
@@ -46,12 +47,20 @@ import time
 import board
 import busio
 
+# *** Load Environment Variables ***
+led_pin = os.getenv("LED_PIN")
+location = os.getenv("LOCATION")
 
 # *** Configure Hardware Pins ***
-led = digitalio.DigitalInOut(board.LED)
+led = digitalio.DigitalInOut(board.__dict__[led_pin])
 led.direction = digitalio.Direction.OUTPUT
 
-i2c = busio.I2C(board.GP5, board.GP4, frequency=100000)
+# PICO
+# i2c = busio.I2C(board.GP5, board.GP4, frequency=100000)
+
+# XIAO ESP32S3
+i2c = busio.I2C(board.IO5, board.IO6, frequency=100000)
+
 mcp = adafruit_mcp9600.MCP9600(i2c, address=96)
 
 # *** Configure Prometheus ***
@@ -77,8 +86,7 @@ tempf_val = 0
 pool = socketpool.SocketPool(wifi.radio)
 server = Server(pool, "/static", debug=True)
 server.start(port=6969)
-
-location = os.getenv("LOCATION")
+print("IP Address:", wifi.radio.ipv4_address)
 
 
 @server.route("/")
@@ -126,6 +134,7 @@ def collect_sensor_data():
         print("Error in collect_sensor_data", str(e))
         gc.collect()
 
+
 async def blinky(blink_count=1):
     led.value = 0
     time.sleep(2)
@@ -135,6 +144,7 @@ async def blinky(blink_count=1):
         time.sleep(0.5)
         led.value = 0
         time.sleep(0.1)
+
 
 async def sensor_loop():
     while True:

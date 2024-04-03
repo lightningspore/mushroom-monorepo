@@ -7,3 +7,6 @@ CIRCUITPY_WIFI_PASSWORD="your-network-password-here"
 
 # Device Labelling
 LOCATION="basement_1"
+
+# PIN Configuration
+LED_PIN="IO21"
