@@ -1,0 +1,3 @@
+adafruit_httpserver
+adafruit-circuitpython-scd4x
+asyncio
