@@ -1,0 +1,40 @@
+#FROM balenalib/%%BALENA_MACHINE_NAME%%-debian
+
+FROM balenalib/%%BALENA_MACHINE_NAME%%-ubuntu-python:jammy
+
+ENV container docker
+
+RUN apt update && apt install -yq --no-install-recommends \
+    wget \
+    gcc \
+    build-essential \
+    && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+
+# Install Poetry
+RUN pip install --upgrade pip \
+    && pip install poetry
+
+# Set the working directory in the builder container
+WORKDIR /app
+
+# Copy only the requirements file and install dependencies
+COPY pyproject.toml poetry.lock /app/
+
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-interaction --no-ansi
+
+
+RUN wget https://github.com/grafana/agent/releases/download/v0.40.3/grafana-agent-0.40.3-1.arm64.deb && \
+    dpkg -i grafana-agent-0.40.3-1.arm64.deb
+
+COPY agent-config.yaml.jinja .
+COPY template.py .
+COPY start.sh /opt/start.sh
+RUN chmod +x /opt/start.sh
+
+
+
+
+CMD ["/opt/start.sh"]
