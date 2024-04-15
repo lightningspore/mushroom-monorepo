@@ -18,5 +18,5 @@ rendered = template.render(targets_list=targets_list, username=username, passwor
 # Print the rendered template
 print(rendered)
 
-with open('agent-config.yaml', 'w') as f:
+with open('grafana-agent.yaml', 'w') as f:
     f.write(rendered)

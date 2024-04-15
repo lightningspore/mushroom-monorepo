@@ -29,7 +29,7 @@ RUN poetry config virtualenvs.create false \
 RUN wget https://github.com/grafana/agent/releases/download/v0.40.3/grafana-agent-0.40.3-1.arm64.deb && \
     dpkg -i grafana-agent-0.40.3-1.arm64.deb
 
-COPY agent-config.yaml.jinja .
+COPY grafana-agent.yaml.jinja .
 COPY template.py .
 COPY start.sh /opt/start.sh
 RUN chmod +x /opt/start.sh
