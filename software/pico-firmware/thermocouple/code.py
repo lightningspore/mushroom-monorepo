@@ -50,6 +50,7 @@ import busio
 # *** Load Environment Variables ***
 led_pin = os.getenv("LED_PIN")
 location = os.getenv("LOCATION")
+sensor_type = "mcp9600"
 
 # *** Configure Hardware Pins ***
 led = digitalio.DigitalInOut(board.__dict__[led_pin])
@@ -64,7 +65,7 @@ i2c = busio.I2C(board.IO5, board.IO6, frequency=100000)
 mcp = adafruit_mcp9600.MCP9600(i2c, address=96)
 
 # *** Configure Prometheus ***
-registry = CollectorRegistry(namespace="pico_mcp9600")
+registry = CollectorRegistry(namespace=sensor_type)
 
 temp_g = Gauge(
     "temp_gauge", "temp sensor gauge", labels=["location"], registry=registry
@@ -124,6 +125,19 @@ def metrics_json(request: Request):
         print("Error in metrics", str(e))
         return Response(request, "Error in metrics")
 
+@server.route("/info")
+def show_info(request: Request):
+    try:
+        print("show info")
+        info_output = {
+            "sensor_type": sensor_type,
+            "location": location,
+        }
+        return Response(request, json.dumps(info_output))
+    except Exception as e:
+        output = f"Error in response: {str(e)}"
+        print(output)
+        return Response(request, output)
 
 def collect_sensor_data():
     global temp_val, tempf_val, humidity_val

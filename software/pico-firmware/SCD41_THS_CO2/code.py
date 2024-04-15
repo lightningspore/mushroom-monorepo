@@ -44,6 +44,7 @@ except Exception as e:
 # *** Load Environment Variables ***
 location = os.getenv("LOCATION")
 led_pin = os.getenv("LED_PIN")
+sensor_type = "scd41"
 
 # *** Configure Hardware Pins ***
 led = digitalio.DigitalInOut(board.__dict__[led_pin])
@@ -65,7 +66,7 @@ print("Waiting for first measurement....")
 
 
 # *** Configure Prometheus ***
-registry = CollectorRegistry(namespace="scd41")
+registry = CollectorRegistry(namespace=sensor_type)
 
 humidity_g = Gauge(
     "humidity_gauge", "humidity sensor gauge", labels=["location"], registry=registry
@@ -144,13 +145,24 @@ def metrics_json(request: Request):
             "humidity": humidity_val,
             "co2": co2_val
         }
-        # print(metrics)
-        print(humidity_g.values)
         return Response(request, json.dumps(metrics))
     except Exception as e:
         print("Error in metrics", str(e))
         return Response(request, "Error in metrics")
 
+@server.route("/info")
+def show_info(request: Request):
+    try:
+        print("show info")
+        info_output = {
+            "sensor_type": sensor_type,
+            "location": location,
+        }
+        return Response(request, json.dumps(info_output))
+    except Exception as e:
+        output = f"Error in response: {str(e)}"
+        print(output)
+        return Response(request, output)
 
 def connect_to_wifi():
     ssid = os.getenv("WIFI_SSID")

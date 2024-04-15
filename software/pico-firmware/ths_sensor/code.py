@@ -44,6 +44,7 @@ except Exception as e:
 # *** Load Environment Variables ***
 location = os.getenv("LOCATION")
 led_pin = os.getenv("LED_PIN")
+sensor_type = "dht20"
 
 # *** Configure Hardware Pins ***
 led = digitalio.DigitalInOut(board.__dict__[led_pin])
@@ -59,7 +60,7 @@ sensor = adafruit_ahtx0.AHTx0(i2c, address=56)
 
 
 # *** Configure Prometheus ***
-registry = CollectorRegistry(namespace="pico_dht20")
+registry = CollectorRegistry(namespace=sensor_type)
 
 humidity_g = Gauge(
     "humidity_gauge", "humidity sensor gauge", labels=["location"], registry=registry
@@ -133,6 +134,21 @@ def metrics_json(request: Request):
     except Exception as e:
         print("Error in metrics", str(e))
         return Response(request, "Error in metrics")
+
+
+@server.route("/info")
+def show_info(request: Request):
+    try:
+        print("show info")
+        info_output = {
+            "sensor_type": sensor_type,
+            "location": location,
+        }
+        return Response(request, json.dumps(info_output))
+    except Exception as e:
+        output = f"Error in response: {str(e)}"
+        print(output)
+        return Response(request, output)
 
 
 def connect_to_wifi():
