@@ -1,13 +1,11 @@
 #!/bin/bash
-echo "Generating Grafana Agent Template"
-python3 /app/template.py
-
-echo "Starting Grafana Agent"
-# grafana-agent --config.file=/app/grafana-agent.yaml
+echo "Discovering sensors on the network..."
 python3 /app/discovery.py
 
 echo "Starting Alloy"
-nohup alloy run /etc/alloy/config.alloy > /app/alloy.log &
+nohup alloy run /etc/alloy/config.alloy \
+  --server.http.listen-addr=0.0.0.0:12345 \
+  > /app/alloy.log &
 
 while : ; do
   echo "Still alive :) :( :| :D :P ;)"
