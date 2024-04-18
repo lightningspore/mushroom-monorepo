@@ -2,6 +2,7 @@ import ipaddress
 import socket
 import json
 import asyncio
+import os
 
 async def scan_network_parallel(cidr, port=6969):
     # Generate list of IP addresses from the CIDR range
@@ -28,14 +29,13 @@ def output_webservers_to_file(webservers, filename="/tmp/sensors.json"):
             "targets": webservers,
         }
     ]
-    
+
     with open(filename, 'w') as file:
         json.dump(data, file, indent=2)
 
 
-# replace with your cidr range
-# cidr_block = "192.168.1.0/24"
-cidr_block = "10.0.0.0/24"
+default_cidr_block = "10.0.0.0/24"
+cidr_block = os.getenv("CIDR_BLOCK", default_cidr_block)
 
 print(f"Scanning {cidr_block} for web servers on port 6969")
 web_servers = asyncio.run(scan_network_parallel(cidr_block))
