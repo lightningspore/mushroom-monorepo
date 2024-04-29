@@ -37,6 +37,7 @@ async def scan_ip(ip, port):
         return ip
     except (asyncio.TimeoutError, Exception) as e:
         print(f"Error scanning {ip}:{port} - {e}")
+
 # replace with your cidr range
 # cidr_block = "192.168.1.0/24"
 cidr_block = "10.0.0.0/24"
