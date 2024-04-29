@@ -1,0 +1,60 @@
+esphome:
+  name: xiao_esp32s3_temp_humidity
+  platform: ESP32
+  board: esp32dev
+
+wifi:
+  ssid: "YourWiFiSSID"
+  password: "YourWiFiPassword"
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Xiao Esp32S3 Fallback Hotspot"
+    password: "FallbackPassword"
+
+captive_portal:
+
+# Configure I2C
+i2c:
+  sda: 21  # Adjust to your SDA pin
+  scl: 22  # Adjust to your SCL pin
+  scan: True  # Scans for I2C devices at startup
+
+# Configure the AM2301B sensor (using AHT10 protocol)
+sensor:
+  - platform: aht10
+    temperature:
+      name: "XIAO ESP32S3 Temperature"
+      id: temperature_sensor
+    humidity:
+      name: "XIAO ESP32S3 Humidity"
+      id: humidity_sensor
+    update_interval: 60s
+
+
+# Enable Home Assistant API
+api:
+  password: "YourAPIPassword"
+
+# Enable over-the-air updates
+ota:
+  password: "YourOTAPassword"
+
+# Enable Prometheus Exporter
+prometheus:
+
+logger:
+  baud_rate: 115200  # Ensure serial logging is enabled, set baud rate
+
+
+# Output sensor readings to the serial port
+interval:
+  - interval: 5s
+    then:
+      - lambda: |-
+          if (id(temperature_sensor).has_state()) {
+            ESP_LOGD("Serial", "Temperature: %.1f°C", id(temperature_sensor).state);
+          }
+          if (id(humidity_sensor).has_state()) {
+            ESP_LOGD("Serial", "Humidity: %.1f%%", id(humidity_sensor).state);
+          }
