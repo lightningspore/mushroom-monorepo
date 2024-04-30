@@ -1,0 +1,8 @@
+platform: mcp9600
+hot_junction:
+  name: "Thermocouple Temperature"
+cold_junction:
+  name: "Ambient Temperature"
+thermocouple_type: K
+address: 0x67
+update_interval: 60s

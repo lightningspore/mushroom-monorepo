@@ -1,0 +1,14 @@
+esp32:
+  board: esp32-s3-devkitc-1
+  framework:
+    type: arduino
+
+i2c:
+  sda: 6  # Adjust to your SDA pin
+  scl: 5  # Adjust to your SCL pin
+  scan: True  # Scans for I2C devices at startup
+
+status_led:
+  pin:
+    number: 21
+    inverted: true
