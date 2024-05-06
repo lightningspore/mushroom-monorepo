@@ -1,10 +1,9 @@
 substitutions:
-  devicename: thermocouple-1
+  devicename: spore-sensor-thermocouple-1
   friendly_name: Thermocouple Sensor
   device_description: Detect Temperature with Thermocouple Sensor
-
-
 
 esphome:
   name: $devicename
   comment: ${device_description}
+  name_add_mac_suffix: true

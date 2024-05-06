@@ -1,0 +1,8 @@
+platform: aht10
+temperature:
+  name: "AM2301B Temperature"
+  # id: temperature_sensor
+humidity:
+  name: "AM2301B Humidity"
+  # id: humidity_sensor
+update_interval: 10s

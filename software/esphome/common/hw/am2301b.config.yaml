@@ -1,0 +1,10 @@
+substitutions:
+  devicename: spore-sensor-ths-1
+  friendly_name: Temp and Humidity Sensor
+  device_description: Detect Temp/Humidity with THS Sensor
+
+esphome:
+  name: $devicename
+  comment: ${device_description}
+  name_add_mac_suffix: true
+

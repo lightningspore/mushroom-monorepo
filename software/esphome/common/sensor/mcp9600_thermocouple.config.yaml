@@ -4,5 +4,5 @@ hot_junction:
 cold_junction:
   name: "Ambient Temperature"
 thermocouple_type: K
-address: 0x67
-update_interval: 60s
+address: 0x60
+update_interval: 10s

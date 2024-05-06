@@ -1,0 +1,8 @@
+platform: scd4x
+co2:
+  name: "SCD41 CO2"
+temperature:
+  name: "SCD41 Temperature"
+humidity:
+  name: "SCD41 Humidity"
+update_interval: 10s

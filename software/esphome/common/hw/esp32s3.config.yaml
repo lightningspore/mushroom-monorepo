@@ -7,6 +7,7 @@ i2c:
   sda: 6  # Adjust to your SDA pin
   scl: 5  # Adjust to your SCL pin
   scan: True  # Scans for I2C devices at startup
+  frequency: 20000.0 # thermocouple mcp9600 seems to require slower speeds
 
 status_led:
   pin:
