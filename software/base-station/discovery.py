@@ -21,12 +21,13 @@ async def scan_ip(ip, port):
     except (asyncio.TimeoutError, Exception) as e:
         print(f"Error scanning {ip}:{port} - {e}")
 
-def output_webservers_to_file(webservers, filename="/tmp/sensors.json"):
+def output_webservers_to_file(webservers: list, filename: str = "/tmp/sensors.json"):
     # Assuming all webservers are in a 'dev' environment for simplicity
     # This can be adjusted as needed
     data = [
         {
             "targets": webservers,
+            "labels": {"location": os.getenv("LOCATION", "uKnOwN")}
         }
     ]
 
