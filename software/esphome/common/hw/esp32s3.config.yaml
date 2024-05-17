@@ -4,10 +4,14 @@ esp32:
     type: arduino
 
 i2c:
-  sda: 6  # Adjust to your SDA pin
-  scl: 5  # Adjust to your SCL pin
+  id: bus_a
+  sda: 5  # Adjust to your SDA pin
+  scl: 6  # Adjust to your SCL pin
   scan: True  # Scans for I2C devices at startup
-  frequency: 20000.0 # thermocouple mcp9600 seems to require slower speeds
+  # frequency: 20000.0 # thermocouple mcp9600 seems to require slower speeds
+  frequency: 200000.0 # thermocouple mcp9600 seems to require slower speeds
+  timeout: 300ms
+
 
 status_led:
   pin:

@@ -4,6 +4,7 @@ packages:
 
 # Enable logging
 logger:
+  level: VERY_VERBOSE
 
 wifi:
   ssid: !secret wifi_ssid
@@ -29,3 +30,5 @@ prometheus:
 
 sensor:
   - <<: !include common/sensor/am2301b_ths.config.yaml
+
+

@@ -29,4 +29,4 @@ prometheus:
 
 sensor:
   - <<: !include common/sensor/scd41_ths_co2.config.yaml
-  - <<: !include common/sensor/am2301b_ths.config.yaml
+  # - <<: !include common/sensor/am2301b_ths.config.yaml

@@ -1,8 +1,11 @@
 platform: aht10
+variant: AHT20
 temperature:
   name: "AM2301B Temperature"
   # id: temperature_sensor
 humidity:
   name: "AM2301B Humidity"
   # id: humidity_sensor
-update_interval: 10s
+update_interval: 20s
+address: 0x38
+i2c_id: bus_a
