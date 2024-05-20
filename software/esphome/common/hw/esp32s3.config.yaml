@@ -9,8 +9,11 @@ i2c:
   scl: 6  # Adjust to your SCL pin
   scan: True  # Scans for I2C devices at startup
   # frequency: 20000.0 # thermocouple mcp9600 seems to require slower speeds
-  frequency: 200000.0 # thermocouple mcp9600 seems to require slower speeds
+  frequency: 200000.0 
   timeout: 300ms
+
+# AHT20 likes faster speeds: 200khz
+# thermocouple MCP9600 seems to require slower speeds: 50khz
 
 
 status_led:

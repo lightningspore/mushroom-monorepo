@@ -4,7 +4,8 @@ packages:
 
 # Enable logging
 logger:
-  level: VERY_VERBOSE
+  # level: VERY_VERBOSE
+  level: VERBOSE
 
 wifi:
   ssid: !secret wifi_ssid
