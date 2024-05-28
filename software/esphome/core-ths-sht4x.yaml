@@ -1,0 +1,35 @@
+packages:
+  esphome: !include common/hw/sht4x.config.yaml
+  esp32: !include common/hw/esp32s3.config.yaml
+
+# Enable logging
+logger:
+  # level: VERY_VERBOSE
+  level: VERBOSE
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    password: !secret fallback_ap_password
+
+captive_portal:
+
+# Enable Home Assistant API
+api:
+  password: "test1234"
+
+ota:
+  password: "test1234"
+
+web_server:
+  port: 6969
+
+prometheus:
+
+sensor:
+  - <<: !include common/sensor/sht4x_ths.config.yaml
+
+

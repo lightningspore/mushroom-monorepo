@@ -1,5 +1,5 @@
 substitutions:
-  devicename: spore-sensor-thermocouple-1
+  devicename: spore-tc-mcp9600
   friendly_name: Thermocouple Sensor
   device_description: Detect Temperature with Thermocouple Sensor
 

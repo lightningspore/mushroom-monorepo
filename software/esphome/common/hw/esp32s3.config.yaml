@@ -8,8 +8,8 @@ i2c:
   sda: 5  # Adjust to your SDA pin
   scl: 6  # Adjust to your SCL pin
   scan: True  # Scans for I2C devices at startup
-  # frequency: 20000.0 # thermocouple mcp9600 seems to require slower speeds
-  frequency: 200000.0 
+  frequency: 20000.0 # thermocouple mcp9600 seems to require slower speeds
+  # frequency: 200000.0 
   timeout: 300ms
 
 # AHT20 likes faster speeds: 200khz

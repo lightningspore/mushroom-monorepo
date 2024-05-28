@@ -1,0 +1,10 @@
+platform: sht4x
+temperature:
+  name: "SHT4X Temperature"
+  # id: temperature_sensor
+humidity:
+  name: "SHT4x Humidity"
+  # id: humidity_sensor
+update_interval: 10s
+address: 0x44
+i2c_id: bus_a
