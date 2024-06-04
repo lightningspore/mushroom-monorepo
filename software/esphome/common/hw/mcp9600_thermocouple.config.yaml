@@ -7,3 +7,6 @@ esphome:
   name: $devicename
   comment: ${device_description}
   name_add_mac_suffix: true
+
+i2c:
+  frequency: 20000.0 # thermocouple mcp9600 seems to require slower speeds

@@ -1,6 +1,7 @@
 packages:
   esphome: !include common/hw/scd41.config.yaml
   esp32: !include common/hw/esp32s3.config.yaml
+  i2c: !include common/hw/scd41.config.yaml
 
 # Enable logging
 logger:
