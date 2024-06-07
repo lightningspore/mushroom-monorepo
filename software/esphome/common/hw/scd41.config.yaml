@@ -1,7 +1,7 @@
 substitutions:
-  devicename: spore-sensor-ths-co2-1
-  friendly_name: Temp and Humidity and CO2 Sensor
-  device_description: Detect Temp/Humidity/CO2 with SCD41 Sensor
+  devicename: spore-sensor-ths-co2
+  friendly_name: CO2 + Temp + Humidity Sensor
+  device_description: Detect CO2/Temp/Humidity with SCD41 Sensor
 
 esphome:
   name: $devicename
