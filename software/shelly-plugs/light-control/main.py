@@ -12,11 +12,16 @@ from ishelly.client import ShellyPlug
 ### Mine is running at `http://192.168.1.201`.
 ### We create two scheduled events for the device: 1 for turning the light on, and 1 for turning the light off.
 
-
 plug_1 = ShellyPlug("http://192.168.1.201")
 
-switch_id = 0
-SECONDS_IN_HOUR = 3600
+#### CONFIGURE SHELLY PLUG US #1 ####
+#-#-#-#-#-#- LIGHT CONTROL START #-#-#-#-#-#-#
+
+switch_id_light = 0
+
+config = plug_1.switch[switch_id_light].get_config()
+config.name = "Light"
+plug_1.switch[switch_id_light].set_config(config)
 
 
 # CRON FORMAT: sec min hour days week weekend
@@ -25,7 +30,7 @@ timespec_on = "0 0 7 * * *"
 
 turn_on = SwitchSetRequest(
     id=1,
-    params=SwitchSetParams(id=switch_id, toggle_after=0, on=True),
+    params=SwitchSetParams(id=switch_id_light, toggle_after=0, on=True),
 )
 
 plug_1.schedule.create(enable=True, timespec=timespec_on, calls=[turn_on])
@@ -36,7 +41,8 @@ timespec_off = "0 0 21 * * *"
 
 turn_off = SwitchSetRequest(
     id=1,
-    params=SwitchSetParams(id=switch_id, toggle_after=0, on=False),
+    params=SwitchSetParams(id=switch_id_light, toggle_after=0, on=False),
 )
 
 plug_1.schedule.create(enable=True, timespec=timespec_off, calls=[turn_off])
+#-#-#-#-#-#- LIGHT CONTROL END #-#-#-#-#-#-#
