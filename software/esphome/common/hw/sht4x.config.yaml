@@ -1,5 +1,5 @@
 substitutions:
-  devicename: spore-sensor-ths-sht4x-1
+  devicename: spore-sensor-ths-sht4x
   friendly_name: Temp and Humidity Sensor SHT4X
   device_description: Detect Temp/Humidity with THS Sensor
 
