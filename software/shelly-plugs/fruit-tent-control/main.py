@@ -5,7 +5,7 @@ from requests import post
 from ishelly.components.switch import *
 from ishelly.components.schedule import *
 from ishelly.components.shelly import *
-from ishelly.client import ShellyPlug, Shelly2PM
+from ishelly.client import ShellyPlug, Shelly2PM, ShellyPro4PM
 
 ### DETAILS:
 ### This code is intended to control 2 Shelly2PM devices which are setup and running on your network.
@@ -19,6 +19,9 @@ from ishelly.client import ShellyPlug, Shelly2PM
 
 plug_1 = Shelly2PM("http://10.0.0.109")
 plug_2 = Shelly2PM("http://10.0.0.186")
+plug_pro = ShellyPro4PM("http://10.0.0.21")
+
+plug_us = ShellyPlug("http://10.0.0.181")
 
 
 switch_id = 0
@@ -91,3 +94,16 @@ turn_on = SwitchSetRequest(
 plug_2.schedule.create(enable=True, timespec=timespec_on, calls=[turn_on])
 #-#-#-#-#-#- HUMIDIFIER CONTROL END #-#-#-#-#-#-#
 
+# New scheduled task for plug_us
+switch_id_plug_us = 0
+config = plug_us.switch.get_config()
+config.name = "Tent-Humidifier 123"
+plug_us.switch.set_config(config)
+
+timespec_on = "0 */5 * * * *"
+turn_on = SwitchSetRequest(
+    id=1,
+    params=SwitchSetParams(id=switch_id_plug_us, toggle_after=120, on=True),
+)
+
+plug_us.schedule.create(enable=True, timespec=timespec_on, calls=[turn_on])
