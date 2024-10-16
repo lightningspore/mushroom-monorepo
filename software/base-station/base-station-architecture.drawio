@@ -1,0 +1,61 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.5.1 Chrome/124.0.6367.207 Electron/30.0.6 Safari/537.36" modified="2024-10-10T20:35:13.105Z" version="24.5.1" etag="zoy6ysubO2e9K5SIWCd2" type="device">
+  <diagram name="Page-1" id="_q8WA-PemwSnJAtqbG32">
+    <mxGraphModel dx="1004" dy="631" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="fgYKm90-ljDWeiCXI7O5-11" value="" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="200" y="120" width="320" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="fgYKm90-ljDWeiCXI7O5-2" value="&lt;font style=&quot;font-size: 29px;&quot;&gt;LightningSpore Sensor Base-Station&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="210" y="10" width="480" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="fgYKm90-ljDWeiCXI7O5-4" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;Supervisord&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="230" y="140" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="fgYKm90-ljDWeiCXI7O5-5" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;Balena&lt;/font&gt;&lt;div style=&quot;font-size: 20px;&quot;&gt;&lt;font style=&quot;font-size: 20px;&quot;&gt;Cloud&lt;/font&gt;&lt;/div&gt;" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="260" y="540" width="150" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="fgYKm90-ljDWeiCXI7O5-6" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0;exitY=1;exitDx=0;exitDy=0;" parent="1" source="fgYKm90-ljDWeiCXI7O5-10" target="fgYKm90-ljDWeiCXI7O5-4" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="290" y="460" as="sourcePoint" />
+            <mxPoint x="610" y="290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="fgYKm90-ljDWeiCXI7O5-8" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;Web UI&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="290" y="230" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="fgYKm90-ljDWeiCXI7O5-9" value="&lt;font style=&quot;font-size: 17px;&quot;&gt;Sensor Device Discovery&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="290" y="310" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="fgYKm90-ljDWeiCXI7O5-10" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;Grafana Alloy&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="290" y="460" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="fgYKm90-ljDWeiCXI7O5-12" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;ESP32&lt;/font&gt;&lt;div style=&quot;font-size: 16px;&quot;&gt;&lt;font style=&quot;font-size: 16px;&quot;&gt;Temp&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 16px;&quot;&gt;&lt;font style=&quot;font-size: 16px;&quot;&gt;Humidity&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 16px;&quot;&gt;&lt;font style=&quot;font-size: 16px;&quot;&gt;CO2&lt;/font&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
+          <mxGeometry x="640" y="120" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="fgYKm90-ljDWeiCXI7O5-13" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;ESP32&lt;/font&gt;&lt;div style=&quot;font-size: 16px;&quot;&gt;&lt;font style=&quot;font-size: 16px;&quot;&gt;Temp&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 16px;&quot;&gt;&lt;font style=&quot;font-size: 16px;&quot;&gt;Humidity&lt;/font&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
+          <mxGeometry x="640" y="220" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="fgYKm90-ljDWeiCXI7O5-14" value="&lt;span style=&quot;font-size: 16px;&quot;&gt;Shelly&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;Relay&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;Module&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;1&lt;/span&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
+          <mxGeometry x="640" y="340" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="fgYKm90-ljDWeiCXI7O5-15" value="&lt;span style=&quot;font-size: 16px;&quot;&gt;Shelly&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;Relay&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;Module&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;2&lt;/span&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
+          <mxGeometry x="640" y="440" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="fgYKm90-ljDWeiCXI7O5-16" value="&lt;font style=&quot;font-size: 17px;&quot;&gt;Shelly Device Discovery&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="290" y="380" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pJC1oF1lM84EEXNWgR9O-1" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;Grafana&lt;/font&gt;&lt;div style=&quot;font-size: 20px;&quot;&gt;&lt;font style=&quot;font-size: 20px;&quot;&gt;Cloud&lt;/font&gt;&lt;/div&gt;" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry y="410" width="150" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="pJC1oF1lM84EEXNWgR9O-3" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.96;entryY=0.7;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="fgYKm90-ljDWeiCXI7O5-10" target="pJC1oF1lM84EEXNWgR9O-1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="390" y="400" as="sourcePoint" />
+            <mxPoint x="440" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

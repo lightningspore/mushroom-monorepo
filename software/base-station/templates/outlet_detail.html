@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Outlet Detail</title>
+</head>
+<body>
+    <h1>Outlet Detail</h1>
+
+    <button onclick="fetchSchedules('{{ device_url }}')">Fetch Schedules</button>
+    <div id="schedules"></div>
+
+    <h2>Update Schedule</h2>
+    <label for="schedule_id">Schedule ID:</label>
+    <input type="number" id="schedule_id" name="schedule_id">
+
+    <label for="switch_id">Switch ID:</label>
+    <input type="number" id="switch_id" name="switch_id">
+
+    <label for="toggle_after_seconds">Toggle After (seconds):</label>
+    <input type="number" id="toggle_after_seconds" name="toggle_after_seconds">
+
+    <label for="next_state">Next State:</label>
+    <input type="checkbox" id="next_state" name="next_state" checked>
+
+    <label for="timespec">Timespec:</label>
+    <input type="text" id="timespec" name="timespec">
+    <button onclick="updateSchedule('{{ device_url }}')">Update Schedule</button>
+
+    <script>
+        function fetchSchedules(deviceUrl) {
+            fetch(`/list_schedules/${deviceUrl}`)
+                .then(response => response.json())
+                .then(data => {
+                    const schedulesDiv = document.getElementById('schedules');
+                    schedulesDiv.innerHTML = '';
+                    const ul = document.createElement('ul');
+                    data.forEach(schedule => {
+                        const li = document.createElement('li');
+                        li.textContent = `ID: ${schedule.id}, Timespec: ${schedule.timespec}, Calls: ${schedule.calls.join(', ')}`;
+                        ul.appendChild(li);
+                    });
+                    schedulesDiv.appendChild(ul);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function updateSchedule(deviceUrl) {
+            const scheduleIdInput = document.getElementById('schedule_id');
+            const scheduleId = parseInt(scheduleIdInput.value);
+            const switchIdInput = document.getElementById('switch_id');
+            const switchId = parseInt(switchIdInput.value);
+            const toggleAfterSeconds = document.getElementById('toggle_after_seconds').value;
+            const nextState = document.getElementById('next_state').checked;
+            const requestData = {
+                device_url: deviceUrl,
+                schedule_id: scheduleId,
+                switch_id: switchId,
+                toggle_after_seconds: parseInt(toggleAfterSeconds),
+                timespec: null,
+                next_state: nextState
+            };
+
+            fetch('/update_schedule', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            })
+                .then(response => response.json())
+                .then(data => console.log('Success:', data))
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
