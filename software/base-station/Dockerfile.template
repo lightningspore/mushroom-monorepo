@@ -27,6 +27,7 @@ COPY alloy.config .
 COPY discovery.py .
 COPY app.py .
 COPY templates/ /app/templates
+COPY pid/ /app/pid
 RUN ls /app/templates
 COPY start.sh /opt/start.sh
 RUN chmod +x /opt/start.sh

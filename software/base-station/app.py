@@ -10,6 +10,9 @@ from ishelly.client import SwitchSetRequest, SwitchSetParams
 
 import socket
 import ipaddress
+import asyncio
+
+from pid.run_pid import pid, waiting_loop
 
 
 templates = Jinja2Templates(directory="templates")
@@ -39,8 +42,8 @@ def device_discovery():
 @app.on_event("startup")
 async def startup_event():
     devices = device_discovery()
-
     app.state.devices = devices
+    asyncio.create_task(waiting_loop())
 
 @app.get("/")
 def read_root():
@@ -52,6 +55,23 @@ def refresh():
     app.state.devices = devices
     return app.state.devices
 
+@app.post("/adjust_setpoint")
+def adjust_setpoint(new_setpoint: float):
+    """
+    Adjust the target setpoint of the PID loop.
+    """
+    pid.setpoint = new_setpoint
+    return {"message": f"PID setpoint adjusted to {new_setpoint}"}
+
+
+@app.post("/update_integral")
+def update_integral(new_integral: float):
+    """
+    Update the current integral setpoint of the PID controller.
+    """
+    pid.set_auto_mode(False)
+    pid.set_auto_mode(True, last_output=new_integral)
+    return {"message": f"PID integral setpoint updated to {new_integral}"}
 
 @app.get("/discover_devices")
 def discover_devices():
