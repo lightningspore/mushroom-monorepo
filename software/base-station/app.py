@@ -11,9 +11,15 @@ from ishelly.client import SwitchSetRequest, SwitchSetParams
 import socket
 import ipaddress
 import asyncio
+import logging
 
 from pid.run_pid import pid, waiting_loop
 
+
+logger = logging.getLogger()
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+logger.addHandler(console_handler)
 
 templates = Jinja2Templates(directory="templates")
 

@@ -37,13 +37,27 @@ def query_grafana_cloud_prometheus(query, start_time, end_time, step):
 # '''
 
 def run_query():
+    # ENV example
+    # query = 
     query = os.getenv("BASE_QUERY")
+
+    # target_sensor = os.getenv("QUERY_FILTER")
+
+    # # ENV example! Dont include the single quotes in the ENV var
+    # # filter = '"job="spore-sensors",location="spore-lab",instance="10.0.0.73:6969",name="SCD41 Humidity"'
+
+    # # TODO
+    # # TODO!!!! START HERE
+
+    # query = f"""
+    # avg_over_time(esphome_sensor_value{query}[5m])
+    # """
 
     query = query.rstrip().lstrip()
 
     # start_time = '2024-10-06T00:00:00Z'
     # end_time = '2024-10-06T02:00:00Z'
-    start_time = (datetime.now(timezone.utc)-timedelta(hours=1)).replace(microsecond=0).isoformat()
+    start_time = (datetime.now(timezone.utc)-timedelta(minutes=20)).replace(microsecond=0).isoformat()
     end_time = (datetime.now(timezone.utc)).replace(microsecond=0).isoformat()
     step = '1m'
 

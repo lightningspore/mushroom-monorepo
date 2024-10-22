@@ -28,13 +28,21 @@ console_handler.setLevel(logging.INFO)
 logger.addHandler(console_handler)
 
 pid_params = tuple(float(x) for x in os.environ.get('PID_PARAMS', '0.25,0.00015,0.001').split(','))
-pid = PID(*pid_params, setpoint=86)
+
+# Set a default PID setpoint
+# Since it will default to this on bootup
+# TODO: Save the setpoint to disk, and use the disk setpoint if available
+default_setpoint = float(os.environ.get('HUMIDITY_SETPOINT', '85'))
+pid = PID(*pid_params, setpoint=default_setpoint)
 pid.set_auto_mode(False)
 pid.set_auto_mode(True, last_output=81)
 print(pid.components)
 
 pid.sample_time = 300
-pid.output_limits = (50, 100)
+# For our base use-case, we are adjusting the duty cycle out of 120 seconds
+# This allows us to set the max and min output time out of 120 seconds
+output_limits_tuple = tuple(float(x) for x in os.environ.get('OUTPUT_LIMITS', '50,110').split(','))
+pid.output_limits = output_limits_tuple
 
 # PID formula
 # output = 
@@ -64,7 +72,7 @@ def set_humidity(setpoint):
 
 def pid_update(average):
     next_setpoint = int(round(pid(average),0))
-    logger.info(f"setting humidity controller to setpoint: {next_setpoint}")
+    logger.info(f"Humidifier will stay on for: ({next_setpoint} / {pid.setpoint} )")
     Pv, Iv, Dv = pid.components
     logger.info(f"PID Components: P -> {Pv}... I -> {Iv}... D -> {Dv}")
     set_humidity(next_setpoint)
@@ -73,7 +81,8 @@ async def waiting_loop():
     while True:
         try:
             current_average = run_query()
-            logger.info(f"Current average humidity of last 15 mins: {current_average}. Current setpoint: {pid.setpoint}")
+            logger.info(f"Current average humidity of last 15 mins: {current_average}")
+            logger.info(f"Current setpoint: {pid.setpoint}")
             if pid.time_fn() - pid._last_time > pid.sample_time:
                 pid_update(current_average)
             logger.info(f"Resting for 1 minute... (-_-)zzZ")
