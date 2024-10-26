@@ -72,7 +72,7 @@ def set_humidity(setpoint):
 
 def pid_update(average):
     next_setpoint = int(round(pid(average),0))
-    logger.info(f"Humidifier will stay on for: ({next_setpoint} / {pid.setpoint} )")
+    logger.info(f"Humidifier will stay on for: ({next_setpoint} seconds)")
     Pv, Iv, Dv = pid.components
     logger.info(f"PID Components: P -> {Pv}... I -> {Iv}... D -> {Dv}")
     set_humidity(next_setpoint)

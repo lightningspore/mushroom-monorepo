@@ -36,6 +36,25 @@ def query_grafana_cloud_prometheus(query, start_time, end_time, step):
 
 # '''
 
+def get_latest_value(query):
+    prometheus_url = os.getenv("PROM_URL") + "/api/v1/query"
+    params = {
+        'query': query
+    }
+    response = requests.get(prometheus_url, auth=auth, params=params)
+    if response.status_code == 200:
+        data = response.json()
+        if data['data']['resultType'] == 'vector':
+            return data['data']['result'][0]['value'][1]
+        else:
+            print("Error: Unexpected result type")
+            return None
+    else:
+        print(f"Error: {response.status_code}")
+        print(response.text)
+        return None
+
+
 def run_query():
     # ENV example
     # query = 
@@ -57,30 +76,16 @@ def run_query():
 
     # start_time = '2024-10-06T00:00:00Z'
     # end_time = '2024-10-06T02:00:00Z'
-    start_time = (datetime.now(timezone.utc)-timedelta(minutes=20)).replace(microsecond=0).isoformat()
-    end_time = (datetime.now(timezone.utc)).replace(microsecond=0).isoformat()
-    step = '1m'
+    # start_time = (datetime.now(timezone.utc)-timedelta(minutes=20)).replace(microsecond=0).isoformat()
+    # end_time = (datetime.now(timezone.utc)).replace(microsecond=0).isoformat()
+    # step = '1m'
 
     import code
     # code.interact(local=locals())
 
-    results = query_grafana_cloud_prometheus(query, start_time, end_time, step)
-
-    target_data = results[0]
-    print(f"timestamp range: {target_data['values'][0][0]} - {target_data['values'][-1][0]}")
-
-
-    pprint(target_data["values"])
-    range_data_list = [ float(x[1]) for x in target_data["values"] ]
-    min_val = round(min(range_data_list),1)
-    max_val = round(max(range_data_list),1)
-    mean_val = round(mean(range_data_list),1)
-
-    print(f"Humidity Calculation (Last Hour)")
-    print(f"Mean -> {mean_val}... Min -> {min_val}... Max -> {max_val}")
-
-
-    return mean_val
+    # results = query_grafana_cloud_prometheus(query, start_time, end_time, step)
+    result = get_latest_value(query)
+    return round(float(result),1)
 
 
 if __name__ == "__main__":
