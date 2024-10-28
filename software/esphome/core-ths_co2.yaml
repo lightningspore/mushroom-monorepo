@@ -19,15 +19,29 @@ captive_portal:
 # Enable Home Assistant API
 api:
   password: "test1234"
+  # TODO: Remove the old api method and use the encryption method below
+  # encryption:
+  #   key: "a_long_random_string_of_32_characters"
 
 ota:
-  password: "test1234"
+  - platform: esphome
+    password: "test1234"
 
 web_server:
   port: 6969
 
 prometheus:
+  include_internal: true
+  relabel:
+    scd41_co2:
+      name: "${zone}"
+    scd41_temp:
+      name: "${zone}"
+    scd41_humidity:
+      name: "${zone}"
 
 sensor:
   - <<: !include common/sensor/scd41_ths_co2.config.yaml
   # - <<: !include common/sensor/am2301b_ths.config.yaml
+
+

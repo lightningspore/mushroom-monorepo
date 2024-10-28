@@ -2,11 +2,13 @@ substitutions:
   devicename: spore-sensor-ths-co2
   friendly_name: CO2 + Temp + Humidity Sensor
   device_description: Detect CO2/Temp/Humidity with SCD41 Sensor
+  zone: DenverSpace
 
 esphome:
   name: $devicename
   comment: ${device_description}
   name_add_mac_suffix: true
+  area: "DenverSpace"
 
 i2c:
   frequency: 150000.0

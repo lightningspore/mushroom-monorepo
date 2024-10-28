@@ -1,8 +1,15 @@
 platform: scd4x
+id: scd41
 co2:
-  name: "SCD41 CO2"
+  # name: "SCD41_CO2"
+  id: scd41_co2
 temperature:
-  name: "SCD41 Temperature"
+  # name: "SCD41_Temperature"
+  id: scd41_temp
+  filters:
+    - lambda: return x * (9.0/5.0) + 32.0;
+  unit_of_measurement: "°F"
 humidity:
-  name: "SCD41 Humidity"
+  # name: "SCD41_Humidity"
+  id: scd41_humidity
 update_interval: 10s
