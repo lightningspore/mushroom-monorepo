@@ -24,25 +24,34 @@ config.name = "Light"
 plug_1.switch[switch_id_light].set_config(config)
 
 
+pprint(plug_1.schedule.list().jobs)
+
 # CRON FORMAT: sec min hour days week weekend
 # LIGHTS ON: 7AM
-timespec_on = "0 0 7 * * *"
+timespec_on = "0 0 7 * * 0,1,2,3,4,5,6"
 
 turn_on = SwitchSetRequest(
     id=1,
-    params=SwitchSetParams(id=switch_id_light, toggle_after=0, on=True),
+    params=SwitchSetParams(id=switch_id_light, toggle_after=None, on=True),
 )
 
 plug_1.schedule.create(enable=True, timespec=timespec_on, calls=[turn_on])
 
 # LIGHTS OFF: 9PM
-timespec_off = "0 0 21 * * *"
+timespec_off = "0 0 22 * * 0,1,2,3,4,5,6"
+
+timespec_off = "0 49 22 * * 0,1,2,3,4,5,6"
+timespec_off = "10 53 22 * * *"
 
 
 turn_off = SwitchSetRequest(
     id=1,
-    params=SwitchSetParams(id=switch_id_light, toggle_after=0, on=False),
+    params=SwitchSetParams(id=switch_id_light, toggle_after=None, on=False),
 )
 
 plug_1.schedule.create(enable=True, timespec=timespec_off, calls=[turn_off])
 #-#-#-#-#-#- LIGHT CONTROL END #-#-#-#-#-#-#
+
+plug_pro.schedule.update(3, True, timespec_off, calls=[turn_off])
+
+plug_pro.schedule.update(2, True, timespec_on, calls=[turn_on])

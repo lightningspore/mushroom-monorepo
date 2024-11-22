@@ -7,6 +7,8 @@ from ishelly.components.schedule import *
 from ishelly.components.shelly import *
 from ishelly.client import ShellyPlug, Shelly2PM, ShellyPro4PM
 
+SECONDS_IN_HOUR = 3600
+
 ### DETAILS:
 ### This code is intended to control 2 Shelly2PM devices which are setup and running on your network.
 ### This code assumes you have a grow tent which has a light, a fan, and a humidifier.
@@ -16,16 +18,18 @@ from ishelly.client import ShellyPlug, Shelly2PM, ShellyPro4PM
 ### 3. Humidifier control for Shelly2PM #2
 ### 4. NOT YET USED for Shelly2PM #2
 
-
+# Initialize the Shelly Client Object
 plug_1 = Shelly2PM("http://10.0.0.109")
 plug_2 = Shelly2PM("http://10.0.0.186")
-plug_pro = ShellyPro4PM("http://10.0.0.21")
-
+plug_pro = ShellyPro4PM("http://192.168.1.125")
 plug_us = ShellyPlug("http://10.0.0.181")
 
 
-switch_id = 0
-SECONDS_IN_HOUR = 3600
+# Define outlet ids
+humidifier_switch_id = 0
+exhaust_fan_switch_id = 2
+light_switch_id = 3
+
 
 
 #### CONFIGURE SHELLY 2PM #1 ####
@@ -97,13 +101,16 @@ plug_2.schedule.create(enable=True, timespec=timespec_on, calls=[turn_on])
 # New scheduled task for plug_us
 switch_id_plug_us = 0
 config = plug_us.switch.get_config()
-config.name = "Tent-Humidifier 123"
+config.name = "Humidifier"
 plug_us.switch.set_config(config)
 
-timespec_on = "0 */5 * * * *"
+timespec_on = "0 */1 * * * *"
 turn_on = SwitchSetRequest(
     id=1,
-    params=SwitchSetParams(id=switch_id_plug_us, toggle_after=120, on=True),
+    params=SwitchSetParams(id=humidifier_switch_id, toggle_after=55, on=True),
 )
 
 plug_us.schedule.create(enable=True, timespec=timespec_on, calls=[turn_on])
+plug_pro.schedule.create(enable=True, timespec=timespec_on, calls=[turn_on])
+
+plug_pro.schedule.update(5, True, timespec_on, calls=[turn_on])
