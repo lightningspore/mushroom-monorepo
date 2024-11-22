@@ -42,7 +42,7 @@ def get_local_cidr():
 def device_discovery():
     cidr = get_local_cidr()
     discovery = ShellyDiscovery(cidr)
-    devices = [ url.rstrip("/rpc") for url in discovery.discover_devices() ] 
+    devices = [ str(url).rstrip("/rpc") for url in discovery.discover_devices() ] 
     return devices
 
 @app.on_event("startup")

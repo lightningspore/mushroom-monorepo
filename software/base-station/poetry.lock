@@ -293,13 +293,13 @@ files = [
 
 [[package]]
 name = "ishelly"
-version = "0.1.4"
+version = "0.1.5.1"
 description = "Control Shelly Home Automation Devices"
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "ishelly-0.1.4-py3-none-any.whl", hash = "sha256:a43c57755281cff913a32517112a60325cab7c24baa6b9a3311915935a46ed22"},
-    {file = "ishelly-0.1.4.tar.gz", hash = "sha256:e2a11c46df055bcc2f006431f6e3c4ebd0f313f4004111e0acaae897f2de9401"},
+    {file = "ishelly-0.1.5.1-py3-none-any.whl", hash = "sha256:323c7a337f6ac57f80ecba66486e419fdc9efbd611ae3a1ac5eb6b5d92e291f2"},
+    {file = "ishelly-0.1.5.1.tar.gz", hash = "sha256:f2487a31bfd345230c2e5083cfeed9a4d3f9c82c4eed21c2ee4c12a28ca739fe"},
 ]
 
 [package.dependencies]

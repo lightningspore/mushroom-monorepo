@@ -61,21 +61,29 @@ pid.output_limits = output_limits_tuple
 
 
 def set_humidity(setpoint):
-    toggle_after_seconds = setpoint
-    timespec_on = "0 */2 * * * *"
-    turn_on = SwitchSetRequest(
-        id=1,
-        params=SwitchSetParams(id=humidity_switch_id, toggle_after=toggle_after_seconds, on=True),
-    )
-    plug_pro.schedule.update(schedule_id, True, timespec_on, calls=[turn_on])
+    try:
+        toggle_after_seconds = setpoint
+        timespec_on = "0 */1 * * * *"
+        turn_on = SwitchSetRequest(
+            id=1,
+            params=SwitchSetParams(id=humidity_switch_id, toggle_after=toggle_after_seconds, on=True),
+        )
+        plug_pro.schedule.update(schedule_id, True, timespec_on, calls=[turn_on])
+    except Exception as e:
+        logger.error(f"function set_humidity error: {e}")
+        raise e
 
 
 def pid_update(average):
-    next_setpoint = int(round(pid(average),0))
-    logger.info(f"Humidifier will stay on for: ({next_setpoint} seconds)")
-    Pv, Iv, Dv = pid.components
-    logger.info(f"PID Components: P -> {Pv}... I -> {Iv}... D -> {Dv}")
-    set_humidity(next_setpoint)
+    try:
+        next_setpoint = int(round(pid(average),0))
+        logger.info(f"Humidifier will stay on for: ({next_setpoint} seconds)")
+        Pv, Iv, Dv = pid.components
+        logger.info(f"PID Components: P -> {Pv}... I -> {Iv}... D -> {Dv}")
+        set_humidity(next_setpoint)
+    except Exception as e:
+        logger.error(f"function pid_update error: {e}")
+        raise e
 
 async def waiting_loop():
     while True:
