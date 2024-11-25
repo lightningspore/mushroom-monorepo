@@ -29,14 +29,15 @@ console_handler.setLevel(logging.INFO)
 logger.addHandler(console_handler)
 
 # File Logger
-log_file = 'app.log'
-log_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-file_handler = RotatingFileHandler(log_file, maxBytes=1024*1024, backupCount=5)
+log_file = "app.log"
+log_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+file_handler = RotatingFileHandler(log_file, maxBytes=1024 * 1024, backupCount=5)
 file_handler.setFormatter(log_formatter)
 logger.setLevel(logging.DEBUG)
 logger.addHandler(file_handler)
 
 templates = Jinja2Templates(directory="templates")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -51,33 +52,38 @@ app = FastAPI(lifespan=lifespan)
 
 app.state.devices = {}
 
+
 def get_local_cidr():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        s.connect(('10.255.255.255', 1))
+        s.connect(("10.255.255.255", 1))
         ip = s.getsockname()[0]
     except Exception:
-        ip = '127.0.0.1'
+        ip = "127.0.0.1"
     finally:
         s.close()
-    cidr = ipaddress.ip_network(f'{ip}/24', strict=False)
+    cidr = ipaddress.ip_network(f"{ip}/24", strict=False)
     return str(cidr)
+
 
 def device_discovery():
     cidr = get_local_cidr()
     discovery = ShellyDiscovery(cidr)
-    devices = [ str(url).rstrip("/rpc") for url in discovery.discover_devices() ] 
+    devices = [str(url).rstrip("/rpc") for url in discovery.discover_devices()]
     return devices
+
 
 @app.get("/")
 async def read_root():
     return {"Hello": "World"}
+
 
 @app.get("/refresh")
 async def refresh():
     devices = device_discovery()
     app.state.devices = devices
     return app.state.devices
+
 
 @app.get("/pid_control", response_class=HTMLResponse)
 async def pid_control(request: Request):
@@ -87,6 +93,7 @@ async def pid_control(request: Request):
 
 class UpdateSetpointRequest(BaseModel):
     new_setpoint: float
+
 
 @app.post("/adjust_setpoint")
 async def adjust_setpoint(request: UpdateSetpointRequest):
@@ -102,8 +109,10 @@ async def adjust_setpoint(request: UpdateSetpointRequest):
         logger.error(f"Error adjusting setpoint: {e}")
         return {"error": str(e)}
 
+
 class UpdateIntegralRequest(BaseModel):
     new_integral: float
+
 
 @app.post("/update_integral")
 async def update_integral(request: UpdateIntegralRequest):
@@ -120,9 +129,11 @@ async def update_integral(request: UpdateIntegralRequest):
         logger.error(f"Error adjusting integral: {e}")
         return {"error": str(e)}
 
+
 @app.get("/discover_devices")
 async def discover_devices():
     return app.state.devices
+
 
 @app.get("/list_schedules")
 async def list_schedules():
@@ -133,6 +144,7 @@ async def list_schedules():
         schedules[device_url] = [str(task) for task in current_schedule.jobs]
     return schedules
 
+
 class ScheduleUpdateRequest(BaseModel):
     device_url: str
     schedule_id: int
@@ -141,27 +153,41 @@ class ScheduleUpdateRequest(BaseModel):
     timespec: Optional[str] = None
     next_state: bool
 
+
 @app.post("/update_schedule")
 def update_schedule(request: ScheduleUpdateRequest):
     plug_pro = ShellyPro4PM(f"http://{request.device_url}")
 
     turn_on = SwitchSetRequest(
         id=1,
-        params=SwitchSetParams(id=request.switch_id, toggle_after=request.toggle_after_seconds, on=request.next_state),
+        params=SwitchSetParams(
+            id=request.switch_id,
+            toggle_after=request.toggle_after_seconds,
+            on=request.next_state,
+        ),
     )
 
     plug_pro.schedule.update(request.schedule_id, request.timespec, calls=[turn_on])
     return {"message": "Schedule updated successfully"}
 
 
-
 @app.get("/list_schedules/{device_url}")
 def list_schedules_for_device(device_url: str):
     plug_pro = ShellyPro4PM(f"http://{device_url}")
     current_schedule = plug_pro.schedule.list()
-    schedules = [{"id": job.id, "timespec": job.timespec, "calls": [str(call) for call in job.calls]} for job in current_schedule.jobs]
+    schedules = [
+        {
+            "id": job.id,
+            "timespec": job.timespec,
+            "calls": [str(call) for call in job.calls],
+        }
+        for job in current_schedule.jobs
+    ]
     return schedules
+
 
 @app.get("/outlet_detail/{device_url}")
 def outlet_detail(device_url: str, request: Request):
-    return templates.TemplateResponse("outlet_detail.html", {"request": request, "device_url": device_url})
+    return templates.TemplateResponse(
+        "outlet_detail.html", {"request": request, "device_url": device_url}
+    )
