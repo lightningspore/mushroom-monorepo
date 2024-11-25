@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, Request, Body
 from fastapi.responses import HTMLResponse
 from starlette.templating import Jinja2Templates
@@ -45,6 +46,10 @@ async def lifespan(app: FastAPI):
     devices = device_discovery()
     app.state.devices = devices
     logger.info("device discovery completed...")
+    if os.getenv("TEST") == "1":
+        logger.info("not running loop in test mode!")
+    asyncio.create_task(waiting_loop())
+    logger.info("PID Control loop started!")
     yield
 
 
@@ -88,7 +93,9 @@ async def refresh():
 @app.get("/pid_control", response_class=HTMLResponse)
 async def pid_control(request: Request):
     logger.debug("ENDPOINT: /pid_control")
-    return templates.TemplateResponse("pid_control.html", {"request": request})
+    # return templates.TemplateResponse("pid_control.html", {"request": request})
+    return templates.TemplateResponse(request, "pid_control.html", {"request": request})
+
 
 
 class UpdateSetpointRequest(BaseModel):
@@ -127,6 +134,19 @@ async def update_integral(request: UpdateIntegralRequest):
         return {"message": f"PID integral setpoint updated to {new_integral}"}
     except Exception as e:
         logger.error(f"Error adjusting integral: {e}")
+        return {"error": str(e)}
+
+
+@app.get("/get_setpoint")
+async def get_setpoint():
+    """
+    Get the current setpoint of the PID controller.
+    """
+    try:
+        current_setpoint = pid.setpoint
+        return {"pid_1": current_setpoint}
+    except Exception as e:
+        logger.error(f"Error getting setpoint: {e}")
         return {"error": str(e)}
 
 
@@ -189,5 +209,5 @@ def list_schedules_for_device(device_url: str):
 @app.get("/outlet_detail/{device_url}")
 def outlet_detail(device_url: str, request: Request):
     return templates.TemplateResponse(
-        "outlet_detail.html", {"request": request, "device_url": device_url}
+        request, "outlet_detail.html", {"request": request, "device_url": device_url}
     )

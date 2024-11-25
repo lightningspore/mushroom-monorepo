@@ -18,7 +18,8 @@ humidity_switch_id = int(os.getenv("HUMIDITY_SWITCH_ID", "0"))
 schedule_id = int(os.getenv("SCHEDULE_ID", "5"))
 device_ip = os.getenv("DEVICE_IP", "192.168.1.125")
 
-plug_pro = ShellyPro4PM(f"http://{device_ip}")
+plug_pro = None
+# ShellyPro4PM(f"http://{device_ip}")
 
 # Configure file logging
 logging.basicConfig(filename='run_pid.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -58,6 +59,9 @@ pid.output_limits = output_limits_tuple
 
 
 
+def initialize_shelly():
+    global plug_pro
+    plug_pro = ShellyPro4PM(f"http://{device_ip}")
 
 
 def set_humidity(setpoint):

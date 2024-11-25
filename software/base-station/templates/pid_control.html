@@ -6,6 +6,14 @@
 <body>
     <h1>PID Control</h1>
 
+    <h2>Current Setpoint</h2>
+    <p id="current-setpoint">Loading...</p>
+
+    <script>
+
+    </script>
+
+    
     <h2>Adjust Setpoint</h2>
     <form id="adjust-setpoint-form">
         <label for="new-setpoint">New Setpoint:</label>
@@ -59,6 +67,23 @@
             const data = await response.json();
             alert(data.message);
         });
+
+        async function getSetpoint() {
+            try {
+                const response = await fetch('/get_setpoint');
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                const data = await response.json();
+                document.getElementById('current-setpoint').textContent = data.pid_1;
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('current-setpoint').textContent = 'Error fetching setpoint';
+            }
+        }
+
+        getSetpoint();
+        setInterval(getSetpoint, 10000);
     </script>
 </body>
 </html>

@@ -19,8 +19,8 @@ COPY pyproject.toml poetry.lock /app/
 RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi
 
-RUN wget https://github.com/grafana/alloy/releases/download/v1.4.2/alloy-1.4.2-1.arm64.deb && \
-dpkg -i alloy-1.4.2-1.arm64.deb
+RUN wget https://github.com/grafana/alloy/releases/download/v1.4.3/alloy-1.4.3-1.arm64.deb && \
+dpkg -i alloy-1.4.3-1.arm64.deb
 
 COPY supervisord.conf /etc/supervisord.conf
 COPY alloy.config .
