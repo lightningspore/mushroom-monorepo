@@ -1,5 +1,9 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Body
+from fastapi.responses import HTMLResponse
 from starlette.templating import Jinja2Templates
+
+from contextlib import asynccontextmanager
+
 
 from pydantic import BaseModel
 from typing import List, Optional
@@ -12,18 +16,38 @@ import socket
 import ipaddress
 import asyncio
 import logging
+from logging.handlers import RotatingFileHandler
 
 from pid.run_pid import pid, waiting_loop
 
 
 logger = logging.getLogger()
+
+# Console Logger
 console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.INFO)
 logger.addHandler(console_handler)
 
+# File Logger
+log_file = 'app.log'
+log_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+file_handler = RotatingFileHandler(log_file, maxBytes=1024*1024, backupCount=5)
+file_handler.setFormatter(log_formatter)
+logger.setLevel(logging.DEBUG)
+logger.addHandler(file_handler)
+
 templates = Jinja2Templates(directory="templates")
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Searching for devices on network!")
+    devices = device_discovery()
+    app.state.devices = devices
+    logger.info("device discovery completed...")
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.state.devices = {}
 
@@ -45,46 +69,63 @@ def device_discovery():
     devices = [ str(url).rstrip("/rpc") for url in discovery.discover_devices() ] 
     return devices
 
-@app.on_event("startup")
-async def startup_event():
-    devices = device_discovery()
-    app.state.devices = devices
-    asyncio.create_task(waiting_loop())
-
 @app.get("/")
-def read_root():
+async def read_root():
     return {"Hello": "World"}
 
 @app.get("/refresh")
-def refresh():
+async def refresh():
     devices = device_discovery()
     app.state.devices = devices
     return app.state.devices
 
+@app.get("/pid_control", response_class=HTMLResponse)
+async def pid_control(request: Request):
+    logger.debug("ENDPOINT: /pid_control")
+    return templates.TemplateResponse("pid_control.html", {"request": request})
+
+
+class UpdateSetpointRequest(BaseModel):
+    new_setpoint: float
+
 @app.post("/adjust_setpoint")
-def adjust_setpoint(new_setpoint: float):
+async def adjust_setpoint(request: UpdateSetpointRequest):
     """
     Adjust the target setpoint of the PID loop.
     """
-    pid.setpoint = new_setpoint
-    return {"message": f"PID setpoint adjusted to {new_setpoint}"}
+    try:
+        new_setpoint = request.new_setpoint
+        logger.info(f"New Setpoint: {new_setpoint}")
+        pid.setpoint = new_setpoint
+        return {"message": f"PID setpoint adjusted to {new_setpoint}"}
+    except Exception as e:
+        logger.error(f"Error adjusting setpoint: {e}")
+        return {"error": str(e)}
 
+class UpdateIntegralRequest(BaseModel):
+    new_integral: float
 
 @app.post("/update_integral")
-def update_integral(new_integral: float):
+async def update_integral(request: UpdateIntegralRequest):
     """
     Update the current integral setpoint of the PID controller.
     """
-    pid.set_auto_mode(False)
-    pid.set_auto_mode(True, last_output=new_integral)
-    return {"message": f"PID integral setpoint updated to {new_integral}"}
+    try:
+        new_integral = request.new_integral
+        logger.info(f"New integral: {new_integral}")
+        pid.set_auto_mode(False)
+        pid.set_auto_mode(True, last_output=new_integral)
+        return {"message": f"PID integral setpoint updated to {new_integral}"}
+    except Exception as e:
+        logger.error(f"Error adjusting integral: {e}")
+        return {"error": str(e)}
 
 @app.get("/discover_devices")
-def discover_devices():
+async def discover_devices():
     return app.state.devices
 
 @app.get("/list_schedules")
-def list_schedules():
+async def list_schedules():
     schedules = {}
     for device_url in app.state.devices:
         plug_pro = ShellyPro4PM(device_url)
@@ -120,9 +161,6 @@ def list_schedules_for_device(device_url: str):
     current_schedule = plug_pro.schedule.list()
     schedules = [{"id": job.id, "timespec": job.timespec, "calls": [str(call) for call in job.calls]} for job in current_schedule.jobs]
     return schedules
-
-
-
 
 @app.get("/outlet_detail/{device_url}")
 def outlet_detail(device_url: str, request: Request):

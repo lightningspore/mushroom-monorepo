@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PID Control</title>
+</head>
+<body>
+    <h1>PID Control</h1>
+
+    <h2>Adjust Setpoint</h2>
+    <form id="adjust-setpoint-form">
+        <label for="new-setpoint">New Setpoint:</label>
+        <input type="number" id="new-setpoint" name="new-setpoint" step="0.01" min="1" max="99" required>
+        <button type="submit">Adjust Setpoint</button>
+    </form>
+
+    <h2>Update Integral</h2>
+    <form id="update-integral-form">
+        <label for="new-integral">New Integral:</label>
+        <input type="number" id="new-integral" name="new-integral" step="0.01" required>
+        <button type="submit">Update Integral</button>
+    </form>
+
+    <script>
+        const adjustSetpointForm = document.getElementById('adjust-setpoint-form');
+        const updateIntegralForm = document.getElementById('update-integral-form');
+
+        adjustSetpointForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const newSetpoint = parseFloat(document.getElementById('new-setpoint').value);
+            try {
+                const response = await fetch('/adjust_setpoint', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ new_setpoint: newSetpoint })
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                const data = await response.json();
+                alert(data.message);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while adjusting the setpoint.');
+            }
+        });
+
+        updateIntegralForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const newIntegral = parseFloat(document.getElementById('new-integral').value);
+            const response = await fetch('/update_integral', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ new_integral: newIntegral })
+            });
+            const data = await response.json();
+            alert(data.message);
+        });
+    </script>
+</body>
+</html>
